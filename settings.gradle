@@ -1,0 +1,3 @@
+include ':opencv420'
+include ':app'
+rootProject.name = "PupilDetection"

@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">PupilDetection</string>
+
+    <string name="b_register">REGISTER</string>
+    <string name="b_verify">VERIFY</string>
+    <string name="b_delete">DELETE</string>
+    <string name="b_cancel">CANCEL</string>
+    <string name="b_save">SAVE</string>
+    <string name="b_settings">SETTINGS</string>
+
+    <string name="tv_settings_scaling">SCALING</string>
+    <string name="tv_settings_brightness">BRIGHTNESS</string>
+    <string name="tv_settings_contrast">CONTRAST</string>
+    <string name="tv_settings_edge">EDGE</string>
+    <string name="tv_settings_gamma">GAMMA</string>
+    <string name="b_settings_capture">CAPTURE</string>
+    <string name="b_settings_save">SAVE</string>
+    <string name="b_settings_reset">RESET</string>
 </resources>

@@ -75,6 +75,9 @@
                 app:layout_constraintHorizontal_weight=".2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:maxLines="1"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone"
                 android:gravity="center"
                 android:text="0"/>
 
@@ -114,6 +117,9 @@
                 app:layout_constraintHorizontal_weight=".2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:maxLines="1"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone"
                 android:gravity="center"
                 android:text="0"/>
 
@@ -153,6 +159,9 @@
                 app:layout_constraintHorizontal_weight=".2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:maxLines="1"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone"
                 android:gravity="center"
                 android:text="0"/>
 
@@ -192,6 +201,9 @@
                 app:layout_constraintHorizontal_weight=".2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:maxLines="1"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone"
                 android:gravity="center"
                 android:text="0"/>
 
@@ -231,6 +243,9 @@
                 app:layout_constraintHorizontal_weight=".2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:maxLines="1"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone"
                 android:gravity="center"
                 android:text="0"/>
 

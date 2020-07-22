@@ -2,6 +2,7 @@ package com.noweaj.android.pupildetection.main;
 
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,10 +14,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.noweaj.android.pupildetection.R;
+import com.noweaj.android.pupildetection.settings.SettingsActivity;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 200;
+    private static final int SETTINGS_ACTIVITY_REQUEST_CODE = 1;
 
     static {
         System.loadLibrary("opencv_java4");
@@ -91,9 +95,23 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             case R.id.b_save:
                 break;
             case R.id.b_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivityForResult(settingsIntent, SETTINGS_ACTIVITY_REQUEST_CODE);
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE){
+            if(resultCode == RESULT_OK){
+                // RESULT_OK
+            } else {
+                // RESULT_CANCELED || FAILED
+            }
         }
     }
 

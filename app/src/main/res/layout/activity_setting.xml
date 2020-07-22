@@ -64,7 +64,9 @@
                 android:layout_height="match_parent"
                 app:layout_constraintLeft_toRightOf="@+id/tv_settings_scaling"
                 app:layout_constraintRight_toLeftOf="@+id/et_settings_scaling"
-                app:layout_constraintHorizontal_weight=".6"/>
+                app:layout_constraintHorizontal_weight=".6"
+                android:min="1"
+                android:max="100"/>
 
             <EditText
                 android:id="@+id/et_settings_scaling"

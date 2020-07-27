@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.disposables.Disposable;
 
-public class EditTextHandler {
+public class InputWatcher {
 
-    private static final String TAG = EditTextHandler.class.getSimpleName();
+    private static final String TAG = InputWatcher.class.getSimpleName();
 
     public Disposable setEditTextWatcher(EditText editText, Activity activity){
         return RxTextView.textChanges(editText)

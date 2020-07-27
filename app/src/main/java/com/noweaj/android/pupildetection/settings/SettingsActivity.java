@@ -12,7 +12,7 @@ import android.widget.SeekBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.noweaj.android.pupildetection.R;
-import com.noweaj.android.pupildetection.rxjava.EditTextHandler;
+import com.noweaj.android.pupildetection.rxjava.InputWatcher;
 
 import org.opencv.android.CameraBridgeViewBase;
 
@@ -84,19 +84,19 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void observeEditText(){
-        disposable_et_scaling = new EditTextHandler().setEditTextWatcher(et_settings_scaling, this);
-        disposable_et_brightness = new EditTextHandler().setEditTextWatcher(et_settings_brightness, this);
-        disposable_et_contrast = new EditTextHandler().setEditTextWatcher(et_settings_contrast, this);
-        disposable_et_edge = new EditTextHandler().setEditTextWatcher(et_settings_edge, this);
-        disposable_et_gamma = new EditTextHandler().setEditTextWatcher(et_settings_gamma, this);
+        disposable_et_scaling = new InputWatcher().setEditTextWatcher(et_settings_scaling, this);
+        disposable_et_brightness = new InputWatcher().setEditTextWatcher(et_settings_brightness, this);
+        disposable_et_contrast = new InputWatcher().setEditTextWatcher(et_settings_contrast, this);
+        disposable_et_edge = new InputWatcher().setEditTextWatcher(et_settings_edge, this);
+        disposable_et_gamma = new InputWatcher().setEditTextWatcher(et_settings_gamma, this);
     }
 
     private void observeSeekBar(){
-        disposable_sb_scaling = new EditTextHandler().setSeekBarWatcher(sb_settings_scaling, this, et_settings_scaling);
-        disposable_sb_brightness = new EditTextHandler().setSeekBarWatcher(sb_settings_brightness, this, et_settings_brightness);
-        disposable_sb_contrast = new EditTextHandler().setSeekBarWatcher(sb_settings_contrast, this, et_settings_contrast);
-        disposable_sb_edge = new EditTextHandler().setSeekBarWatcher(sb_settings_edge, this, et_settings_edge);
-        disposable_sb_gamma = new EditTextHandler().setSeekBarWatcher(sb_settings_gamma, this, et_settings_gamma);
+        disposable_sb_scaling = new InputWatcher().setSeekBarWatcher(sb_settings_scaling, this, et_settings_scaling);
+        disposable_sb_brightness = new InputWatcher().setSeekBarWatcher(sb_settings_brightness, this, et_settings_brightness);
+        disposable_sb_contrast = new InputWatcher().setSeekBarWatcher(sb_settings_contrast, this, et_settings_contrast);
+        disposable_sb_edge = new InputWatcher().setSeekBarWatcher(sb_settings_edge, this, et_settings_edge);
+        disposable_sb_gamma = new InputWatcher().setSeekBarWatcher(sb_settings_gamma, this, et_settings_gamma);
     }
 
     @Override

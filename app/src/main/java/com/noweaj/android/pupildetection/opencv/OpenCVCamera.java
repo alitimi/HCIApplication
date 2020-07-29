@@ -29,7 +29,6 @@ public class OpenCVCamera implements CameraBridgeViewBase.CvCameraViewListener2 
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mListener.onCameraFrame(inputFrame);
-        return null;
+        return mListener.onCameraFrame(inputFrame);
     }
 }

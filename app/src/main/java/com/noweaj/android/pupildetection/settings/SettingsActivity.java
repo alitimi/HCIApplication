@@ -1,24 +1,28 @@
 package com.noweaj.android.pupildetection.settings;
 
-import android.os.Bundle;
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.noweaj.android.pupildetection.R;
+import com.noweaj.android.pupildetection.core.BaseActivity;
 import com.noweaj.android.pupildetection.rxjava.InputWatcher;
 
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.Mat;
+
+import java.util.Collections;
+import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
+public class SettingsActivity extends BaseActivity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnClickListener {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
@@ -51,18 +55,15 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
             disposable_sb_gamma;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    protected void initView(){
         setContentView(R.layout.activity_setting);
 
-        initView();
-    }
+        jcv_settings_camera = findViewById(R.id.jcv_settings_camera);
+        jcv_settings_camera.setVisibility(SurfaceView.VISIBLE);
+        jcv_settings_camera.setCvCameraViewListener(this);
+        jcv_settings_camera.setCameraIndex(1);
+        jcv_settings_camera.enableFpsMeter();
 
-    private void initView(){
         b_settings_capture = findViewById(R.id.b_settings_capture);
         b_settings_save = findViewById(R.id.b_settings_save);
         b_settings_reset = findViewById(R.id.b_settings_reset);
@@ -81,6 +82,32 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
 
         observeEditText();
         observeSeekBar();
+    }
+
+    @Override
+    @TargetApi(Build.VERSION_CODES.M)
+    protected void onCameraPermissionGranted(){
+        Log.d(TAG, "onCameraPermissionGranted");
+        List<? extends CameraBridgeViewBase> cameraViews = Collections.singletonList(jcv_settings_camera);
+        if (cameraViews == null) {
+            return;
+        }
+        for (CameraBridgeViewBase cameraBridgeViewBase: cameraViews) {
+            if (cameraBridgeViewBase != null) {
+                cameraBridgeViewBase.setCameraPermissionGranted();
+            }
+        }
+    }
+
+    @Override
+    protected void enableView() {
+        jcv_settings_camera.enableView();
+    }
+
+    @Override
+    protected void disableView() {
+        if(jcv_settings_camera != null)
+            jcv_settings_camera.disableView();
     }
 
     private void observeEditText(){
@@ -132,5 +159,21 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         disposable_sb_contrast.dispose();
         disposable_sb_edge.dispose();
         disposable_sb_gamma.dispose();
+    }
+
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat matInput = inputFrame.rgba();
+        return matInput;
     }
 }

@@ -1,4 +1,4 @@
-package com.noweaj.android.pupildetection;
+package com.noweaj.android.pupildetection.core.ui;
 
 public interface BaseView<T> {
     void setPresenter(T presenter);

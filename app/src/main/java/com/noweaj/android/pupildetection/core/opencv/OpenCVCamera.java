@@ -1,4 +1,4 @@
-package com.noweaj.android.pupildetection.opencv;
+package com.noweaj.android.pupildetection.core.opencv;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;

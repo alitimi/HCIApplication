@@ -1,12 +1,15 @@
 package com.noweaj.android.pupildetection.main;
 
-import com.noweaj.android.pupildetection.BaseView;
+import android.widget.Button;
+
+import com.noweaj.android.pupildetection.core.ui.BasePresenter;
+import com.noweaj.android.pupildetection.core.ui.BaseView;
 
 public interface MainContract {
-    interface View {
-
+    interface View extends BaseView<Presenter> {
+        void startSettingsActivity();
     }
-    interface Presenter{
-
+    interface Presenter extends BasePresenter {
+        void observeButton(Button button, int flag);
     }
 }

@@ -4,15 +4,13 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import com.noweaj.android.pupildetection.R;
-import com.noweaj.android.pupildetection.core.BaseActivity;
-import com.noweaj.android.pupildetection.rxjava.InputWatcher;
+import com.noweaj.android.pupildetection.core.ui.BaseActivity;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
@@ -20,16 +18,16 @@ import org.opencv.core.Mat;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.disposables.Disposable;
-
-public class SettingsActivity extends BaseActivity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnClickListener {
+public class SettingsActivity extends BaseActivity implements SettingsContract.View, CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
+
+    private SettingsContract.Presenter mPresenter;
 
     private CameraBridgeViewBase jcv_settings_camera;
     private ImageView iv_settings_preview;
 
-    private SeekBar sb_settings_scaling,
+    public SeekBar sb_settings_scaling,
             sb_settings_brightness,
             sb_settings_contrast,
             sb_settings_edge,
@@ -43,16 +41,10 @@ public class SettingsActivity extends BaseActivity implements CameraBridgeViewBa
             b_settings_save,
             b_settings_reset;
 
-    private Disposable disposable_et_scaling,
-            disposable_et_brightness,
-            disposable_et_contrast,
-            disposable_et_edge,
-            disposable_et_gamma,
-            disposable_sb_scaling,
-            disposable_sb_brightness,
-            disposable_sb_contrast,
-            disposable_sb_edge,
-            disposable_sb_gamma;
+    @Override
+    public void setPresenter(SettingsContract.Presenter presenter) {
+        mPresenter = presenter;
+    }
 
     @Override
     protected void initView(){
@@ -80,8 +72,31 @@ public class SettingsActivity extends BaseActivity implements CameraBridgeViewBa
         sb_settings_edge = findViewById(R.id.sb_settings_edge);
         sb_settings_gamma = findViewById(R.id.sb_settings_gamma);
 
-        observeEditText();
-        observeSeekBar();
+        mPresenter = new SettingsPresenter(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresenter.subscribe();
+        observe();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPresenter.unsubscribe();
+    }
+
+    @Override
+    protected void enableView() {
+        jcv_settings_camera.enableView();
+    }
+
+    @Override
+    protected void disableView() {
+        if(jcv_settings_camera != null)
+            jcv_settings_camera.disableView();
     }
 
     @Override
@@ -99,66 +114,22 @@ public class SettingsActivity extends BaseActivity implements CameraBridgeViewBa
         }
     }
 
-    @Override
-    protected void enableView() {
-        jcv_settings_camera.enableView();
-    }
+    private void observe(){
+        mPresenter.observeEditText(et_settings_scaling, this, sb_settings_scaling);
+        mPresenter.observeEditText(et_settings_brightness, this, sb_settings_brightness);
+        mPresenter.observeEditText(et_settings_contrast, this, sb_settings_contrast);
+        mPresenter.observeEditText(et_settings_edge, this, sb_settings_edge);
+        mPresenter.observeEditText(et_settings_gamma, this, sb_settings_gamma);
 
-    @Override
-    protected void disableView() {
-        if(jcv_settings_camera != null)
-            jcv_settings_camera.disableView();
-    }
+        mPresenter.observeSeekBar(sb_settings_scaling, this, et_settings_scaling);
+        mPresenter.observeSeekBar(sb_settings_brightness, this, et_settings_brightness);
+        mPresenter.observeSeekBar(sb_settings_contrast, this, et_settings_contrast);
+        mPresenter.observeSeekBar(sb_settings_edge, this, et_settings_edge);
+        mPresenter.observeSeekBar(sb_settings_gamma, this, et_settings_gamma);
 
-    private void observeEditText(){
-        disposable_et_scaling = new InputWatcher().setEditTextWatcher(et_settings_scaling, this);
-        disposable_et_brightness = new InputWatcher().setEditTextWatcher(et_settings_brightness, this);
-        disposable_et_contrast = new InputWatcher().setEditTextWatcher(et_settings_contrast, this);
-        disposable_et_edge = new InputWatcher().setEditTextWatcher(et_settings_edge, this);
-        disposable_et_gamma = new InputWatcher().setEditTextWatcher(et_settings_gamma, this);
-    }
-
-    private void observeSeekBar(){
-        disposable_sb_scaling = new InputWatcher().setSeekBarWatcher(sb_settings_scaling, this, et_settings_scaling);
-        disposable_sb_brightness = new InputWatcher().setSeekBarWatcher(sb_settings_brightness, this, et_settings_brightness);
-        disposable_sb_contrast = new InputWatcher().setSeekBarWatcher(sb_settings_contrast, this, et_settings_contrast);
-        disposable_sb_edge = new InputWatcher().setSeekBarWatcher(sb_settings_edge, this, et_settings_edge);
-        disposable_sb_gamma = new InputWatcher().setSeekBarWatcher(sb_settings_gamma, this, et_settings_gamma);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.b_settings_capture:
-                break;
-            case R.id.b_settings_save:
-                break;
-            case R.id.b_settings_reset:
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        dispose();
-    }
-
-    private void dispose(){
-        Log.d(TAG, "dispose disposables");
-        disposable_et_scaling.dispose();
-        disposable_et_brightness.dispose();
-        disposable_et_contrast.dispose();
-        disposable_et_edge.dispose();
-        disposable_et_gamma.dispose();
-
-        disposable_sb_scaling.dispose();
-        disposable_sb_brightness.dispose();
-        disposable_sb_contrast.dispose();
-        disposable_sb_edge.dispose();
-        disposable_sb_gamma.dispose();
+        mPresenter.observeButton(b_settings_capture);
+        mPresenter.observeButton(b_settings_save);
+        mPresenter.observeButton(b_settings_reset);
     }
 
     @Override
@@ -176,4 +147,5 @@ public class SettingsActivity extends BaseActivity implements CameraBridgeViewBa
         Mat matInput = inputFrame.rgba();
         return matInput;
     }
+
 }

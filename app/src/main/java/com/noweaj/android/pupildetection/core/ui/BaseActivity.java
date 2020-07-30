@@ -1,4 +1,4 @@
-package com.noweaj.android.pupildetection.core;
+package com.noweaj.android.pupildetection.core.ui;
 
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

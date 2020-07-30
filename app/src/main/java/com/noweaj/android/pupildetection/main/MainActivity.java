@@ -10,8 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.noweaj.android.pupildetection.R;
-import com.noweaj.android.pupildetection.core.BaseActivity;
+import com.noweaj.android.pupildetection.core.ui.BaseActivity;
 import com.noweaj.android.pupildetection.settings.SettingsActivity;
+import com.noweaj.android.pupildetection.settings.SettingsContract;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
@@ -19,10 +20,12 @@ import org.opencv.core.Mat;
 import java.util.Collections;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements CameraBridgeViewBase.CvCameraViewListener2, MainContract.View, View.OnClickListener {
+public class MainActivity extends BaseActivity implements CameraBridgeViewBase.CvCameraViewListener2, MainContract.View {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int SETTINGS_ACTIVITY_REQUEST_CODE = 200;
+
+    private MainContract.Presenter mPresenter;
 
     static {
         System.loadLibrary("opencv_java4");
@@ -34,6 +37,11 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
     private Button b_register, b_verify, b_delete, b_cancel, b_save, b_settings;
 
     @Override
+    public void setPresenter(MainContract.Presenter presenter) {
+        mPresenter = presenter;
+    }
+
+    @Override
     protected void initView(){
         setContentView(R.layout.activity_main);
 
@@ -43,53 +51,38 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
         camera.setCameraIndex(1); //front 1, back 0
         camera.enableFpsMeter();
 
+        tv_instruction = findViewById(R.id.tv_instruction);
+
         b_register = findViewById(R.id.b_register);
-        b_register.setOnClickListener(this);
         b_verify = findViewById(R.id.b_verify);
-        b_verify.setOnClickListener(this);
         b_delete = findViewById(R.id.b_delete);
-        b_delete.setOnClickListener(this);
         b_cancel = findViewById(R.id.b_cancel);
-        b_cancel.setOnClickListener(this);
         b_save = findViewById(R.id.b_save);
-        b_save.setOnClickListener(this);
         b_settings = findViewById(R.id.b_settings);
-        b_settings.setOnClickListener(this);
 
+        mPresenter = new MainPresenter(this);
+    }
+
+    private void setClicks(){
+        mPresenter.observeButton(b_register, 0);
+        mPresenter.observeButton(b_verify, 1);
+        mPresenter.observeButton(b_delete, 2);
+        mPresenter.observeButton(b_cancel, 3);
+        mPresenter.observeButton(b_save, 4);
+        mPresenter.observeButton(b_settings, 5);
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.b_register:
-                break;
-            case R.id.b_verify:
-                break;
-            case R.id.b_delete:
-                break;
-            case R.id.b_cancel:
-                break;
-            case R.id.b_save:
-                break;
-            case R.id.b_settings:
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivityForResult(settingsIntent, SETTINGS_ACTIVITY_REQUEST_CODE);
-                break;
-            default:
-                break;
-        }
+    protected void onResume() {
+        super.onResume();
+        mPresenter.subscribe();
+        setClicks();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE){
-            if(resultCode == RESULT_OK){
-                // RESULT_OK
-            } else {
-                // RESULT_CANCELED || FAILED
-            }
-        }
+    protected void onPause() {
+        super.onPause();
+        mPresenter.unsubscribe();
     }
 
     @Override
@@ -118,6 +111,24 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
         }
     }
 
+    @Override
+    public void startSettingsActivity() {
+        Intent settingsIntent = new Intent(this, SettingsActivity.class);
+        startActivityForResult(settingsIntent, SETTINGS_ACTIVITY_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE){
+            if(resultCode == RESULT_OK){
+                // RESULT_OK
+            } else {
+                // RESULT_CANCELED || FAILED
+            }
+        }
+    }
+
     // CameraBridgeViewBase.CvCameraViewListener2
     @Override
     public void onCameraViewStarted(int width, int height) {
@@ -141,4 +152,5 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
     // Native
     public native void ConvertRGBtoGray(long matAddrInput, long matAddrResult);
     public native long LoadCascade(String cascadeFileName);
+
 }

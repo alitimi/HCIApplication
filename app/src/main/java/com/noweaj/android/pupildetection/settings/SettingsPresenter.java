@@ -7,19 +7,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
+import com.jakewharton.rxbinding3.view.RxView;
 import com.jakewharton.rxbinding3.widget.RxSeekBar;
 import com.jakewharton.rxbinding3.widget.RxTextView;
+import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
+
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.Mat;
 
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public class SettingsPresenter implements SettingsContract.Presenter {
+public class SettingsPresenter implements SettingsContract.Presenter, CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = SettingsPresenter.class.getSimpleName();
 
     private SettingsContract.View mView;
+    private OpencvNative nativeMethod = new OpencvNative();
 
     public SettingsPresenter(SettingsContract.View mView){
         this.mView = mView;
@@ -39,7 +45,8 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     }
 
     @Override
-    public void observeEditText(EditText editText, Activity activity, SeekBar seekbar) {
+    public void observeEditText(EditText editText, Activity activity, SeekBar seekbar, int max) {
+        int maxValue = max-1;
         Disposable disposable = RxTextView.textChanges(editText)
                 .debounce(400, TimeUnit.MILLISECONDS)
                 .subscribe(charSequence -> {
@@ -50,10 +57,10 @@ public class SettingsPresenter implements SettingsContract.Presenter {
                         activity.runOnUiThread(() -> {
                             editText.setText("0");
                         });
-                    } else if(Integer.parseInt(charSequence.toString()) > 100){
-                        Log.d(TAG, "value more than limit(100)");
+                    } else if(Integer.parseInt(charSequence.toString()) > maxValue){
+                        Log.d(TAG, "value more than limit("+maxValue+")");
                         activity.runOnUiThread(() -> {
-                            editText.setText("100");
+                            editText.setText(String.valueOf(maxValue));
                         });
                     } else {
                         Log.d(TAG, "value "+charSequence);
@@ -82,7 +89,49 @@ public class SettingsPresenter implements SettingsContract.Presenter {
     }
 
     @Override
-    public void observeButton(Button button) {
+    public void observeButton(Button button, int flag) {
+        Disposable disposable = RxView.clicks(button)
+                .debounce(300, TimeUnit.MILLISECONDS)
+                .subscribe(data -> {
+                    switch (flag){
+                        case 0: // capture
+                            break;
+                        case 1: // save
+                            break;
+                        case 2: // reset
+                            break;
+                        case 3: // exit
+                            mView.finishActivity();
+                            break;
+                        default:
+                            break;
+                    }
+                }, error -> {
+                    Log.d(TAG, error.getLocalizedMessage());
+                });
+        mCompositeDisposable.add(disposable);
+    }
 
+    // CameraBridgeViewBase.CvCameraViewListener2
+    @Override
+    public CameraBridgeViewBase.CvCameraViewListener2 getCvCameraViewListener() {
+        return this;
+    }
+
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat matInput = inputFrame.rgba();
+        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+        return matInput;
     }
 }

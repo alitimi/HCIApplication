@@ -20,7 +20,7 @@ import org.opencv.core.Mat;
 import java.util.Collections;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements CameraBridgeViewBase.CvCameraViewListener2, MainContract.View {
+public class MainActivity extends BaseActivity implements MainContract.View {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int SETTINGS_ACTIVITY_REQUEST_CODE = 200;
@@ -45,9 +45,11 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
     protected void initView(){
         setContentView(R.layout.activity_main);
 
+        mPresenter = new MainPresenter(this);
+
         camera = findViewById(R.id.jcv_camera);
         camera.setVisibility(SurfaceView.VISIBLE);
-        camera.setCvCameraViewListener(this);
+        camera.setCvCameraViewListener(mPresenter.getCvCameraViewListener());
         camera.setCameraIndex(1); //front 1, back 0
         camera.enableFpsMeter();
 
@@ -59,8 +61,13 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
         b_cancel = findViewById(R.id.b_cancel);
         b_save = findViewById(R.id.b_save);
         b_settings = findViewById(R.id.b_settings);
+    }
 
-        mPresenter = new MainPresenter(this);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresenter.subscribe();
+        setClicks();
     }
 
     private void setClicks(){
@@ -70,13 +77,6 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
         mPresenter.observeButton(b_cancel, 3);
         mPresenter.observeButton(b_save, 4);
         mPresenter.observeButton(b_settings, 5);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mPresenter.subscribe();
-        setClicks();
     }
 
     @Override
@@ -128,29 +128,4 @@ public class MainActivity extends BaseActivity implements CameraBridgeViewBase.C
             }
         }
     }
-
-    // CameraBridgeViewBase.CvCameraViewListener2
-    @Override
-    public void onCameraViewStarted(int width, int height) {
-
-    }
-
-    @Override
-    public void onCameraViewStopped() {
-
-    }
-
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat matInput = inputFrame.rgba();
-//        Mat matResult = new Mat(matInput.rows(), matInput.cols(), matInput.type());
-        ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
-        return matInput;
-//        return  inputFrame.rgba();
-    }
-
-    // Native
-    public native void ConvertRGBtoGray(long matAddrInput, long matAddrResult);
-    public native long LoadCascade(String cascadeFileName);
-
 }

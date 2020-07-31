@@ -13,7 +13,15 @@
     <string name="tv_settings_contrast">CONTRAST</string>
     <string name="tv_settings_edge">EDGE</string>
     <string name="tv_settings_gamma">GAMMA</string>
+
     <string name="b_settings_capture">CAPTURE</string>
     <string name="b_settings_save">SAVE</string>
     <string name="b_settings_reset">RESET</string>
+    <string name="b_settings_exit">EXIT</string>
+
+    <integer name="scaling_max">11</integer>
+    <integer name="brightness_max">51</integer>
+    <integer name="contrast_max">16</integer>
+    <integer name="edge_max">151</integer>
+    <integer name="gamma_max">16</integer>
 </resources>

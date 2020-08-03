@@ -1,7 +1,6 @@
 package com.noweaj.android.pupildetection.settings;
 
 import android.app.Activity;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
@@ -19,7 +18,7 @@ public interface SettingsContract {
     interface Presenter extends BasePresenter {
         void observeEditText(EditText editText, Activity activity, SeekBar seekbar, int max);
         void observeSeekBar(SeekBar seekBar, Activity activity, EditText editText);
-        void observeButton(Button button, int flag);
+        void observeView(android.view.View view, int flag);
         CameraBridgeViewBase.CvCameraViewListener2 getCvCameraViewListener();
     }
 }

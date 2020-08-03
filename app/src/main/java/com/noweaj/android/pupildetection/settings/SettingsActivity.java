@@ -2,10 +2,7 @@ package com.noweaj.android.pupildetection.settings;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Build;
-import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -64,12 +61,6 @@ public class SettingsActivity extends BaseActivity implements SettingsContract.V
         jcv_settings_camera.setCvCameraViewListener(mPresenter.getCvCameraViewListener());
         jcv_settings_camera.setCameraIndex(1);
         jcv_settings_camera.enableFpsMeter();
-        jcv_settings_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
 
         b_settings_capture = findViewById(R.id.b_settings_capture);
         b_settings_save = findViewById(R.id.b_settings_save);
@@ -143,10 +134,11 @@ public class SettingsActivity extends BaseActivity implements SettingsContract.V
         mPresenter.observeSeekBar(sb_settings_edge, this, et_settings_edge);
         mPresenter.observeSeekBar(sb_settings_gamma, this, et_settings_gamma);
 
-        mPresenter.observeButton(b_settings_capture, 0);
-        mPresenter.observeButton(b_settings_save, 1);
-        mPresenter.observeButton(b_settings_reset, 2);
-        mPresenter.observeButton(b_settings_exit, 3);
+        mPresenter.observeView(b_settings_capture, 0);
+        mPresenter.observeView(b_settings_save, 1);
+        mPresenter.observeView(b_settings_reset, 2);
+        mPresenter.observeView(b_settings_exit, 3);
+        mPresenter.observeView(jcv_settings_camera, 4);
     }
 
     @Override

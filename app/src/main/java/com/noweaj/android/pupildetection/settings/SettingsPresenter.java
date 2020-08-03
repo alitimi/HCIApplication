@@ -3,6 +3,7 @@ package com.noweaj.android.pupildetection.settings;
 import android.app.Activity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -89,8 +90,8 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
     }
 
     @Override
-    public void observeButton(Button button, int flag) {
-        Disposable disposable = RxView.clicks(button)
+    public void observeView(View view, int flag) {
+        Disposable disposable = RxView.clicks(view)
                 .debounce(300, TimeUnit.MILLISECONDS)
                 .subscribe(data -> {
                     switch (flag){
@@ -102,6 +103,8 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
                             break;
                         case 3: // exit
                             mView.finishActivity();
+                            break;
+                        case 4: // camera click
                             break;
                         default:
                             break;

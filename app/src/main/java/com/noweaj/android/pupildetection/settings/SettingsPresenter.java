@@ -96,15 +96,21 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
                 .subscribe(data -> {
                     switch (flag){
                         case 0: // capture
+                            Log.d(TAG, "capture");
+                            mView.startCameraActivity();
                             break;
                         case 1: // save
+                            Log.d(TAG, "save");
                             break;
                         case 2: // reset
+                            Log.d(TAG, "reset");
                             break;
                         case 3: // exit
+                            Log.d(TAG, "exit");
                             mView.finishActivity();
                             break;
                         case 4: // camera click
+                            Log.d(TAG, "camera");
                             break;
                         default:
                             break;

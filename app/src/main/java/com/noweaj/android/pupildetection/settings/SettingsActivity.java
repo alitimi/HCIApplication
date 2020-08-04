@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import com.noweaj.android.pupildetection.R;
+import com.noweaj.android.pupildetection.camera.CameraActivity;
 import com.noweaj.android.pupildetection.core.ui.BaseActivity;
 
 import org.opencv.android.CameraBridgeViewBase;
@@ -158,5 +159,11 @@ public class SettingsActivity extends BaseActivity implements SettingsContract.V
         Intent finishIntent = new Intent();
         setResult(RESULT_OK, finishIntent);
         finish();
+    }
+
+    @Override
+    public void startCameraActivity() {
+        Intent cameraIntent = new Intent(this, CameraActivity.class);
+        startActivity(cameraIntent);
     }
 }

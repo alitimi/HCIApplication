@@ -13,6 +13,8 @@ public interface SettingsContract {
 
     interface View extends BaseView<Presenter> {
         void finishActivity();
+
+        void startCameraActivity();
     }
 
     interface Presenter extends BasePresenter {

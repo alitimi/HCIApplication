@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 #opencv library
-OPENCVROOT := A:\jaycho\dev\workspace\workspace_android\PupilDetection\opencv420
+OPENCVROOT := A:\Development\src\AndroidWorkspace\PupilDetection\opencv420
 OPENCV_CAMERA_MODULES := on
 OPENCV_INSTALL_MODULES := on
 OPENCV_LIB_TYPE := SHARED

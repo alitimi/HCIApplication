@@ -441,9 +441,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                 // ADDED ENDS
 
                 //orig
-//                canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-//                if (BuildConfig.DEBUG)
-//                    Log.d(TAG, "mStretch value: " + mScale);
+                canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+                if (BuildConfig.DEBUG)
+                    Log.d(TAG, "mStretch value: " + mScale);
 
                 if (mScale != 0) {
                     canvas.drawBitmap(mCacheBitmap, new Rect(0,0,mCacheBitmap.getWidth(), mCacheBitmap.getHeight()),

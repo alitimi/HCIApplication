@@ -3,13 +3,19 @@ package com.noweaj.android.pupildetection.camera;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
+import android.media.Image;
+import android.media.ImageReader;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -37,7 +43,13 @@ public class CameraActivity extends AppCompatActivity {
     private CameraDevice mCamera;
     private SurfaceHolder mHolder;
     private CameraCaptureSession mCaptureSession;
-    private CaptureRequest.Builder mPreviewCaptureRequest;
+    private CaptureRequest mCaptureRequest;
+    private CaptureRequest.Builder mPreviewCaptureRequestBuilder;
+    private ImageReader mImageReader;
+    private int mPreviewFormat = ImageFormat.YUV_420_888;
+    private Size mPreviewSize = new Size(-1, -1);
+
+    private int width, height;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +71,11 @@ public class CameraActivity extends AppCompatActivity {
 
     private void initView(){
         sv_camera = findViewById(R.id.sv_camera);
+
+        width = sv_camera.getWidth();
+        height = sv_camera.getHeight();
         mHolder = sv_camera.getHolder();
+
         b_camera = findViewById(R.id.b_camera);
         b_camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +90,7 @@ public class CameraActivity extends AppCompatActivity {
         String[] cameraIds;
         try {
             cameraIds = cameraManager.getCameraIdList();
+
             if (cameraIds.length == 0) return;
 
             cameraId = cameraIds[0];
@@ -81,8 +98,6 @@ public class CameraActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-    private int width = 400, height = 300;
 
     private void setPreview(){
         mHolder.addCallback(surfaceHolderCallback);
@@ -103,12 +118,27 @@ public class CameraActivity extends AppCompatActivity {
 
     private void startCameraCaptureSession() throws CameraAccessException{
         if(mCamera == null || mHolder.isCreating()) return;
+//
+//        mImageReader = ImageReader.newInstance(width, height, mPreviewFormat, 2);
+//        mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+//            @Override
+//            public void onImageAvailable(ImageReader reader) {
+//                Image image = reader.acquireLatestImage();
+//                if(image == null) return;
+//
+//                Image.Plane[] planes = image.getPlanes();
+//                assert (planes.length == 3);
+//                assert (image.getFormat() == mPreviewFormat);
+//
+//            }
+//        }, mBackgroundHandler);
+//
 
         Surface previewSurface = mHolder.getSurface();
 
         // create preview's CaptureRequest.Builder
-        mPreviewCaptureRequest = mCamera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-        mPreviewCaptureRequest.addTarget(previewSurface);
+        mPreviewCaptureRequestBuilder = mCamera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        mPreviewCaptureRequestBuilder.addTarget(previewSurface);
 
         try{
             mCamera.createCaptureSession(Arrays.asList(previewSurface), captureSessionCallback, null);
@@ -169,9 +199,11 @@ public class CameraActivity extends AppCompatActivity {
         public void onConfigured(@NonNull CameraCaptureSession session) {
             mCaptureSession = session;
             try{
+                mPreviewCaptureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+
                 mCaptureSession.setRepeatingRequest(
-                        mPreviewCaptureRequest.build(),
-                        null,
+                        mPreviewCaptureRequestBuilder.build(),
+                        mCaptureCallback,
                         null);
             } catch (CameraAccessException e){
                 e.printStackTrace();
@@ -181,6 +213,22 @@ public class CameraActivity extends AppCompatActivity {
         @Override
         public void onConfigureFailed(@NonNull CameraCaptureSession session) {
             Log.e(TAG, "Capture Session onConfigureFailed");
+        }
+    };
+
+    CameraCaptureSession.CaptureCallback mCaptureCallback = new CameraCaptureSession.CaptureCallback() {
+        @Override
+        public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
+            process(partialResult);
+        }
+
+        @Override
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            process(result);
+        }
+
+        private void process(CaptureResult result){
+
         }
     };
 

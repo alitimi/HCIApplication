@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -17,6 +18,12 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
@@ -28,12 +35,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected abstract void initView();
     protected abstract void onCameraPermissionGranted();
-    protected abstract void onExternalStoragePermissionGranted();
     protected abstract void enableView();
     protected abstract void disableView();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -81,6 +87,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if(havePermission){
             Log.d(TAG, "havePermission");
             onCameraPermissionGranted();
+            onExternalStoragePermissionGranted();
         }
     }
 
@@ -91,16 +98,23 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     @TargetApi(Build.VERSION_CODES.M)
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if(requestCode == PERMISSION_REQUEST_CODE
-                && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-            for(int result : grantResults){
-
+                && grantResults.length > 0){
+            boolean permFlag = true;
+            for(int i=0; i<grantResults.length; i++){
+                if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
+                    showDialogForPermission("OpenCV requires following permission:\n"+permissions[i]);
+                    permFlag = false;
+                    break;
+                }
             }
-            onCameraPermissionGranted();
+            if(permFlag) {
+                onCameraPermissionGranted();
+                onExternalStoragePermissionGranted();
+            }
         } else {
-            showDialogForPermission("OpenCV requires camera permission!");
+            showDialogForPermission("Invalid request");
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -136,5 +150,52 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         });
         builder.create().show();
+    }
+
+    private void onExternalStoragePermissionGranted(){
+        String[] filesInAssets = new String[0];
+        try{
+            filesInAssets = getAssets().list("");
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        if(filesInAssets.length < 1){
+            Log.d(TAG, "Cannot load cascade files from assets directory.");
+            showDialogForPermission("Cannot load cascade files from assets directory.");
+            return;
+        }
+
+        String baseDir = Environment.getExternalStorageDirectory().getPath();
+        String[] targetDirs = new String[filesInAssets.length];
+        for(int i=0; i<targetDirs.length; i++){
+            String filename = filesInAssets[i];
+            Log.d(TAG, "Current file from assets directory: "+filename);
+            targetDirs[i] = baseDir+File.separator+filename;
+            Log.d(TAG, "Copy destination: "+targetDirs[i]);
+            File file = new File(targetDirs[i]);
+            if(!file.exists()) { // check if file exists
+                Log.d(TAG, "File "+targetDirs[i]+" does not exist. Copying ...");
+                InputStream is;
+                OutputStream os;
+                try {
+                    is = getAssets().open(filename);
+                    os = new FileOutputStream(targetDirs[i]);
+
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = is.read(buffer)) != -1) {
+                        os.write(buffer, 0, read);
+                    }
+                    is.close();
+                    os.flush();
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.d(TAG, "File "+targetDirs[i]+" does exist. Skip copying.");
+            }
+        }
     }
 }

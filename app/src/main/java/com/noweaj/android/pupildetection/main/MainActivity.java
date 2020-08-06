@@ -112,6 +112,11 @@ public class MainActivity extends BaseActivity implements MainContract.View {
     }
 
     @Override
+    protected void onExternalStoragePermissionGranted() {
+
+    }
+
+    @Override
     public void startSettingsActivity() {
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
         startActivityForResult(settingsIntent, SETTINGS_ACTIVITY_REQUEST_CODE);

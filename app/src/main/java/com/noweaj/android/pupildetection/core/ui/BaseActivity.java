@@ -18,15 +18,17 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String TAG = BaseActivity.class.getSimpleName();
 
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
+    private static final int PERMISSION_REQUEST_CODE = 100;
 
     protected abstract void initView();
     protected abstract void onCameraPermissionGranted();
+    protected abstract void onExternalStoragePermissionGranted();
     protected abstract void enableView();
     protected abstract void disableView();
 
@@ -70,8 +72,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onStart();
         boolean havePermission = true;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(checkSelfPermission(CAMERA) != PackageManager.PERMISSION_GRANTED){
-                requestPermissions(new String[]{CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+            if(checkSelfPermission(CAMERA) != PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{CAMERA, WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
                 havePermission = false;
             }
         }
@@ -89,9 +92,12 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.M)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == CAMERA_PERMISSION_REQUEST_CODE
+        if(requestCode == PERMISSION_REQUEST_CODE
                 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            for(int result : grantResults){
+
+            }
             onCameraPermissionGranted();
         } else {
             showDialogForPermission("OpenCV requires camera permission!");
@@ -121,7 +127,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 .setPositiveButton("RETRY", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestPermissions(new String[]{CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+                        requestPermissions(new String[]{CAMERA}, PERMISSION_REQUEST_CODE);
                     }
                 }).setNegativeButton("QUIT", new DialogInterface.OnClickListener() {
             @Override

@@ -122,6 +122,11 @@ public class SettingsActivity extends BaseActivity implements SettingsContract.V
         }
     }
 
+    @Override
+    protected void onExternalStoragePermissionGranted() {
+
+    }
+
     private void observe(){
         mPresenter.observeEditText(et_settings_scaling, this, sb_settings_scaling, getResources().getInteger(R.integer.scaling_max));
         mPresenter.observeEditText(et_settings_brightness, this, sb_settings_brightness, getResources().getInteger(R.integer.brightness_max));

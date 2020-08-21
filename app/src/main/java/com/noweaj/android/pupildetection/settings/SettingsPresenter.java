@@ -143,4 +143,7 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
         nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
         return matInput;
     }
+
+    // Native
+
 }

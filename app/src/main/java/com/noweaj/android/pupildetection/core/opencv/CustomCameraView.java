@@ -1,6 +1,11 @@
 package com.noweaj.android.pupildetection.core.opencv;
 
 import android.content.Context;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.util.AttributeSet;
 
 import org.opencv.android.JavaCamera2View;
@@ -15,6 +20,15 @@ public class CustomCameraView extends JavaCamera2View {
     }
 
     public void takePicture(){
-//        super.takePicture();
+        lockFocus();
+    }
+
+    private void lockFocus(){
+//        try{
+//            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
+//                    CameraMetadata.CONTROL_AF_TRIGGER_START);
+//
+//            mCaptureSession.capture(mPreviewRequestBuilder.build(), ,)
+//        }
     }
 }

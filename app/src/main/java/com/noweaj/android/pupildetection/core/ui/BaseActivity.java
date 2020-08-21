@@ -95,8 +95,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         if(havePermission){
             Log.d(TAG, "havePermission");
-            onCameraPermissionGranted();
-            onExternalStoragePermissionGranted();
+            onAllPermissionsGranted();
         }
     }
 
@@ -138,8 +137,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             }
             if(permFlag) { // 모든 권한 허용됨
-                onCameraPermissionGranted();
-                onExternalStoragePermissionGranted();
+                onAllPermissionsGranted();
             } else {
                 showDialogForPermission("PupilDetection requires following permission:\n"+sb.toString());
             }
@@ -180,6 +178,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         });
         builder.create().show();
+    }
+
+    private void onAllPermissionsGranted(){
+        onExternalStoragePermissionGranted();
+        onCameraPermissionGranted();
     }
 
     private void onExternalStoragePermissionGranted(){
@@ -225,6 +228,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                     is.close();
                     os.flush();
                     os.close();
+
+                    readCascade();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -232,5 +237,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                 Log.d(TAG, "File "+targetDirs+" does exist. Skip copying.");
             }
         }
+    }
+
+    private void readCascade(){
+
     }
 }

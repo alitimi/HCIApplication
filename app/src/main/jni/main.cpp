@@ -50,10 +50,13 @@ extern "C"{
         __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
 
         for(int i=0; i<faces.size(); i++){
-            double face_x = faces[i].x;
-            double face_y = faces[i].y;
             double face_width = faces[i].width;
             double face_height = faces[i].height;
+
+//            if(face_width < img_result.cols/3)
+
+            double face_x = faces[i].x;
+            double face_y = faces[i].y;
 
             Point center(face_x+face_width/2, face_y+face_height/2);
             ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);

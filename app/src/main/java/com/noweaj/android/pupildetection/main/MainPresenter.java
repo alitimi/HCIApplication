@@ -8,7 +8,10 @@ import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
 import com.noweaj.android.pupildetection.data.CascadeData;
 
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.concurrent.TimeUnit;
 
@@ -83,9 +86,13 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat matInput = inputFrame.rgba();
+        Mat matInput = inputFrame.gray();
+        Mat matModified = Imgproc.getRotationMatrix2D(new Point(matInput.cols()/2, matInput.rows()/2), 90, 1);
+        Imgproc.warpAffine(matInput, matInput, matModified, matInput.size());
 //        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
-        OpencvNative.DetectFrontalFace(CascadeData.cascade_frontalface, matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+//        Core.flip(matInput, matInput, 1);
+//        Core.rotate(matInput, matInput, Core.ROTATE_90_CLOCKWISE);
+//        OpencvNative.DetectFrontalFace(CascadeData.cascade_frontalface, matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
         return matInput;
     }
 }

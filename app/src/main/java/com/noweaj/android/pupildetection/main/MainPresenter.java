@@ -5,6 +5,7 @@ import android.widget.Button;
 
 import com.jakewharton.rxbinding3.view.RxView;
 import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
+import com.noweaj.android.pupildetection.data.CascadeData;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
@@ -19,7 +20,6 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
     private static final String TAG = MainPresenter.class.getSimpleName();
 
     private MainContract.View mView;
-    private OpencvNative nativeMethod = new OpencvNative();
 
     public MainPresenter(MainContract.View mView){
         this.mView = mView;
@@ -84,11 +84,8 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat matInput = inputFrame.rgba();
-        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+//        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+        OpencvNative.DetectFrontalFace(CascadeData.cascade_frontalface, matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
         return matInput;
     }
-
-    // Native
-    public native void ConvertRGBtoGray(long matAddrInput, long matAddrResult);
-    public native long LoadCascade(String cascadeFileName);
 }

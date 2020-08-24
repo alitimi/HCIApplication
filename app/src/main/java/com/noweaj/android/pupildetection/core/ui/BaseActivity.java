@@ -13,6 +13,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
+import com.noweaj.android.pupildetection.data.CascadeData;
 import com.noweaj.android.pupildetection.util.FileUtil;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -188,28 +190,30 @@ public abstract class BaseActivity extends AppCompatActivity {
     private void onExternalStoragePermissionGranted(){
         String[] filesInAssets = new String[0];
         try{
-            filesInAssets = getAssets().list("");
+            filesInAssets = getAssets().list(""); // get entries in assets directory
         } catch (IOException e){
             e.printStackTrace();
         }
 
-        if(filesInAssets.length < 1){
+        if(filesInAssets.length < 1){ // if assets dir is empty
             Log.d(TAG, "Cannot load cascade files from assets directory.");
             showDialogForPermission("Cannot load cascade files from assets directory.");
             return;
         }
 
+        // /storage/emulated/0/PupilDetection
         String projectDir = Environment.getExternalStorageDirectory().getPath()
                 +File.separator+"PupilDetection";
         FileUtil.createDir(projectDir);
 
+        // /storage/emulated/0/PupilDetection/cascade
         String baseDir = projectDir+File.separator+"cascade";
         FileUtil.createDir(baseDir);
 
         for(int i=0; i<filesInAssets.length; i++){
             String filename = filesInAssets[i];
             Log.d(TAG, "Current file from assets directory: "+filename);
-            String targetDirs = baseDir+File.separator+filename;
+            String targetDirs = baseDir+File.separator+filename; // full target file path
             Log.d(TAG, "Copy destination: "+targetDirs);
             File file = new File(targetDirs);
             if(!file.exists()) { // check if file exists
@@ -222,24 +226,48 @@ public abstract class BaseActivity extends AppCompatActivity {
 
                     byte[] buffer = new byte[1024];
                     int read;
-                    while ((read = is.read(buffer)) != -1) {
-                        os.write(buffer, 0, read);
+                    while ((read = is.read(buffer)) != -1) { // read file
+                        os.write(buffer, 0, read); // write file
                     }
                     is.close();
                     os.flush();
                     os.close();
 
-                    readCascade();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else {
                 Log.d(TAG, "File "+targetDirs+" does exist. Skip copying.");
             }
+            loadCascade(); // load cascade
         }
     }
 
-    private void readCascade(){
+    private void loadCascade(){
+        if(!CascadeData.readCascade){ // prevent re-load cascades
+            // get file entries
+            String fileDir = Environment.getExternalStorageDirectory().getPath()
+                    +File.separator+"PupilDetection"+File.separator+"cascade";
+            String[] fileArr = FileUtil.getDirEntry(fileDir);
 
+            // read cascades
+            boolean faceFlag = false, eyeFlag = false;
+            for(String filename : fileArr){
+                Log.d(TAG, "filePath: "+fileDir+File.separator+filename);
+                if(filename.contains("frontalface")) { // read frontalface cascade
+                    CascadeData.cascade_frontalface = OpencvNative.LoadCascade(fileDir + File.separator + filename);
+                    if(CascadeData.cascade_frontalface != 0) // if read not failed
+                        faceFlag = true;
+                }
+                if(filename.contains("eye")) { // read eye cascade
+                    CascadeData.cascade_eyes = OpencvNative.LoadCascade(fileDir + File.separator + filename);
+                    if(CascadeData.cascade_eyes != 0) // if read not failed
+                        eyeFlag = true;
+                }
+            }
+            if(faceFlag && eyeFlag){ // check all cascades are read
+                CascadeData.readCascade = true;
+            }
+        }
     }
 }

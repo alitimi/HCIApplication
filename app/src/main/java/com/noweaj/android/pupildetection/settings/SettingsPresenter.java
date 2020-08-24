@@ -26,7 +26,6 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
     private static final String TAG = SettingsPresenter.class.getSimpleName();
 
     private SettingsContract.View mView;
-    private OpencvNative nativeMethod = new OpencvNative();
 
     public SettingsPresenter(SettingsContract.View mView){
         this.mView = mView;
@@ -140,7 +139,7 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat matInput = inputFrame.rgba();
-        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+        OpencvNative.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
         return matInput;
     }
 

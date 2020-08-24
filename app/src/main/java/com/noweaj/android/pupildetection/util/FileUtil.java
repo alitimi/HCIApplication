@@ -12,6 +12,10 @@ public class FileUtil {
             return false;
     }
 
+    public static String[] getDirEntry(String dir){
+        return new File(dir).list();
+    }
+
     public static boolean copyFile(String orig, String dest){
         File origFile = new File(orig);
         File destFile = new File(dest);

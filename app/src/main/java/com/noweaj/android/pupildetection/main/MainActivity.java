@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.noweaj.android.pupildetection.R;
 import com.noweaj.android.pupildetection.core.ui.BaseActivity;
+import com.noweaj.android.pupildetection.data.CascadeData;
 import com.noweaj.android.pupildetection.settings.SettingsActivity;
 import com.noweaj.android.pupildetection.settings.SettingsContract;
 
@@ -88,6 +89,7 @@ public class MainActivity extends BaseActivity implements MainContract.View {
     @Override
     protected void enableView() {
         camera.enableView();
+        Log.d("jaycho", "readCascade: "+CascadeData.readCascade);
     }
 
     @Override

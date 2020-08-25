@@ -74,7 +74,7 @@ extern "C"{
         int minWidth = img_result.cols/3;
 
         ((CascadeClassifier *) cascade_face)->detectMultiScale(img_result, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(minWidth, 30));
-        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
+//        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
 
         for(int i=0; i<faces.size(); i++){
             double face_width = faces[i].width;
@@ -91,12 +91,18 @@ extern "C"{
             Mat faceROI = img_result(face_area);
             std::vector<Rect> eyes;
 
-            ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+            Point face_center(face_x+((face_width - face_x)/2), face_y+((face_height - face_y)/2));
 
+            ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "============================");
             for(int j=0; j<eyes.size(); j++){
                 Point eye_center(face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
-                int radius = cvRound((eyes[j].width+eyes[j].height)*0.25);
-                circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
+                __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "eye point: %lf %lf", face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
+                if(eye_center.y < face_center.y) {
+                    int radius = cvRound((eyes[j].width + eyes[j].height) * 0.25);
+                    circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
+//                    circle(img_result, Point(0, 0), radius, Scalar(255, 0, 255), 20, 8, 0);
+                }
             }
         }
     }

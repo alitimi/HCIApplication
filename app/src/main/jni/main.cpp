@@ -46,14 +46,14 @@ extern "C"{
 
         std::vector<Rect> faces;
 
-        ((CascadeClassifier *) cascade_face)->detectMultiScale(img_result, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+        int minWidth = img_result.cols/3;
+
+        ((CascadeClassifier *) cascade_face)->detectMultiScale(img_result, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(minWidth, 30));
         __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
 
         for(int i=0; i<faces.size(); i++){
             double face_width = faces[i].width;
             double face_height = faces[i].height;
-
-//            if(face_width < img_result.cols/3)
 
             double face_x = faces[i].x;
             double face_y = faces[i].y;
@@ -64,8 +64,41 @@ extern "C"{
     }
 
     JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
-    (JNIEnv *env, jobject instance, jlong cascade_eye, jlong matAddrInput, jlong matAddrResult){
+    (JNIEnv *env, jobject instance, jlong cascade_face, jlong cascade_eye, jlong matAddrInput, jlong matAddrResult){
 
+        // Detect face
+        Mat &img_result = *(Mat *)matAddrResult;
+
+        std::vector<Rect> faces;
+
+        int minWidth = img_result.cols/3;
+
+        ((CascadeClassifier *) cascade_face)->detectMultiScale(img_result, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(minWidth, 30));
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
+
+        for(int i=0; i<faces.size(); i++){
+            double face_width = faces[i].width;
+            double face_height = faces[i].height;
+
+            double face_x = faces[i].x;
+            double face_y = faces[i].y;
+
+            Point center(face_x+face_width/2, face_y+face_height/2);
+            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
+
+            // Detect eyes
+            Rect face_area(face_x, face_y, face_width, face_height);
+            Mat faceROI = img_result(face_area);
+            std::vector<Rect> eyes;
+
+            ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+
+            for(int j=0; j<eyes.size(); j++){
+                Point eye_center(face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
+                int radius = cvRound((eyes[j].width+eyes[j].height)*0.25);
+                circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
+            }
+        }
     }
 
     JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectPupil

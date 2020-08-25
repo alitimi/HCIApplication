@@ -93,6 +93,7 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
 //        Core.flip(matInput, matInput, 1);
 //        Core.rotate(matInput, matInput, Core.ROTATE_90_CLOCKWISE);
 //        OpencvNative.DetectFrontalFace(CascadeData.cascade_frontalface, matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+        OpencvNative.DetectEyes(CascadeData.cascade_frontalface, CascadeData.cascade_eyes, matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
         return matInput;
     }
 }

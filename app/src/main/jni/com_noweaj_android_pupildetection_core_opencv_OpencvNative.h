@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_Opencv
  * Signature: (JJJ)V
  */
 JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
-  (JNIEnv *, jobject, jlong, jlong, jlong);
+  (JNIEnv *, jobject, jlong, jlong, jlong, jlong);
 
 /*
  * Class:     com_noweaj_android_pupildetection_core_opencv_OpencvNative

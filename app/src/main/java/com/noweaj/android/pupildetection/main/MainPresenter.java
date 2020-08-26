@@ -86,7 +86,7 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat matInput = inputFrame.gray();
+        Mat matInput = inputFrame.rgba();
         Mat matModified = Imgproc.getRotationMatrix2D(new Point(matInput.cols()/2, matInput.rows()/2), 90, 1);
         Imgproc.warpAffine(matInput, matInput, matModified, matInput.size());
 //        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());

@@ -15,6 +15,8 @@ import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.concurrent.TimeUnit;
 
@@ -138,8 +140,9 @@ public class SettingsPresenter implements SettingsContract.Presenter, CameraBrid
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat matInput = inputFrame.rgba();
-        OpencvNative.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
+        Mat matInput = inputFrame.gray();
+        Mat matModified = Imgproc.getRotationMatrix2D(new Point(matInput.cols()/2, matInput.rows()/2), 90, 1);
+        Imgproc.warpAffine(matInput, matInput, matModified, matInput.size());
         return matInput;
     }
 

@@ -43,13 +43,15 @@ extern "C"{
     JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectFrontalFace
     (JNIEnv *env, jobject instance, jlong cascade_face, jlong matAddrInput, jlong matAddrResult){
         Mat &img_result = *(Mat *)matAddrResult;
+        Mat img_gray;
+        cvtColor(img_result, img_gray, COLOR_RGBA2GRAY);
 
         std::vector<Rect> faces;
 
-        int minWidth = img_result.cols/3;
+        int minWidth = img_result.cols/3; // 화면 너비의 1/3 이하인 얼굴 검체는 인식하지 않도록 한다
 
-        ((CascadeClassifier *) cascade_face)->detectMultiScale(img_result, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(minWidth, 30));
-        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
+        ((CascadeClassifier *) cascade_face)->detectMultiScale(img_gray, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(minWidth, 30));
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %lu found", faces.size());
 
         for(int i=0; i<faces.size(); i++){
             double face_width = faces[i].width;
@@ -61,9 +63,63 @@ extern "C"{
             Point center(face_x+face_width/2, face_y+face_height/2);
             ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
         }
+        img_gray.release();
     }
 
     JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
+    (JNIEnv *env, jobject instance, jlong cascade_face, jlong cascade_eye, jlong matAddrInput, jlong matAddrResult){
+        Mat &img_result = *(Mat *)matAddrResult;
+
+        // draw face guide
+//        circle(img_result, Point(0, 0), 10, Scalar(255, 0, 255), 20, 8, 0);
+//        circle(img_result, Point(img_result.cols, 0), 10, Scalar(255, 0, 255), 20, 8, 0);
+//        circle(img_result, Point(0, img_result.rows), 10, Scalar(255, 0, 255), 20, 8, 0);
+//        circle(img_result, Point(img_result.cols, img_result.rows), 10, Scalar(255, 0, 255), 20, 8, 0);
+        ellipse(img_result, Point(img_result.cols/2, img_result.rows/2), Size(img_result.cols/3, img_result.rows/2.5), 0, 0, 360, Scalar(255, 0, 0), 10, 8, 0);
+
+        // Detect face
+        Mat img_gray;
+        cvtColor(img_result, img_gray, COLOR_RGBA2GRAY);
+
+        std::vector<Rect> faces;
+
+        int minWidth = img_result.cols/3;
+
+        ((CascadeClassifier *) cascade_face)->detectMultiScale(img_gray, faces, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(minWidth, 30));
+//        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
+
+        for(int i=0; i<faces.size(); i++){
+            double face_width = faces[i].width;
+            double face_height = faces[i].height;
+
+            double face_x = faces[i].x;
+            double face_y = faces[i].y;
+
+            Point center(face_x+face_width/2, face_y+face_height/2);
+//            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
+
+            // Detect eyes
+            Rect face_area(face_x, face_y, face_width, face_height);
+            Mat faceROI = img_gray(face_area);
+            std::vector<Rect> eyes;
+
+            Point face_center(face_x+((face_width - face_x)/2), face_y+((face_height - face_y)/2));
+
+            ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "============================");
+            for(int j=0; j<eyes.size(); j++){
+                Point eye_center(face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
+                __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "eye point: %lf %lf", face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
+                if(eye_center.y < face_center.y) {
+                    int radius = cvRound((eyes[j].width + eyes[j].height) * 0.25);
+                    circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
+//                    circle(img_result, Point(0, 0), radius, Scalar(255, 0, 255), 20, 8, 0);
+                }
+            }
+        }
+    }
+
+    JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectPupil
     (JNIEnv *env, jobject instance, jlong cascade_face, jlong cascade_eye, jlong matAddrInput, jlong matAddrResult){
 
         // Detect face
@@ -102,13 +158,15 @@ extern "C"{
                     int radius = cvRound((eyes[j].width + eyes[j].height) * 0.25);
                     circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
 //                    circle(img_result, Point(0, 0), radius, Scalar(255, 0, 255), 20, 8, 0);
+
+                    // Detect pupil
+//                    Rect eye_area(eye_center.x - );
+//                    Mat eye_only(faceROI, eye_area);
+
+//                    double minLoc, maxLoc;
+//                    cv::minMaxLoc(, minLoc, maxLoc);
                 }
             }
         }
-    }
-
-    JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectPupil
-    (JNIEnv *env, jobject instance, jlong cascade_face, jlong cascade_eye, jlong matAddrInput, jlong matAddrResult){
-
     }
 }

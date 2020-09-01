@@ -45,12 +45,12 @@ extern "C"{
 
     double face_x_global, face_y_global;
 
-    void getValidEyes_rect(std::vector<Rect> eyes, std::vector<Rect>& valid_eyes, int bounds, double face_x, double face_y){
+    void getValidEyes_rect(vector<Rect> eyes, vector<Rect>& valid_eyes, int bounds, double face_x, double face_y){
 
 //        face_x_global = face_x;
         face_y_global = face_y;
 
-        std::sort(eyes.begin(), eyes.end(), [](Rect a, Rect b){
+        sort(eyes.begin(), eyes.end(), [](Rect a, Rect b){
 //            Point eye_a(face_x_global+a.x+a.width/2, face_y_global+a.y+a.height/2);
 //            Point eye_b(face_x_global+b.x+b.width/2, face_y_global+b.y+b.height/2);
             return face_y_global+a.y+a.height/2 < face_y_global+b.y+b.height/2;
@@ -178,8 +178,8 @@ extern "C"{
 //                Point eye_center(face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
 //                __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "eye point: %lf %lf", face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
                 if(eye_center.y < face_center.y) {
-                    int radius = cvRound((valid_eyes[j].width + valid_eyes[j].height) * 0.25);
-                    circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
+//                    int radius = cvRound((valid_eyes[j].width + valid_eyes[j].height) * 0.25);
+//                    circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
                     Rect valid_eyes_corrected(face_x+valid_eyes[j].x, face_y+valid_eyes[j].y, valid_eyes[j].width, valid_eyes[j].height);
                     rectangle(img_result, valid_eyes_corrected, Scalar(0, 255, 0), 10, 8, 0);
 //                    circle(img_result, Point(0, 0), radius, Scalar(255, 0, 255), 20, 8, 0);
@@ -191,7 +191,6 @@ extern "C"{
     JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectPupil
     (JNIEnv *env, jobject instance, jlong cascade_face, jlong cascade_eye, jlong matAddrInput, jlong matAddrResult){
 
-        // Detect face
         Mat &img_result = *(Mat *)matAddrResult;
 
         // draw face guide
@@ -205,7 +204,7 @@ extern "C"{
         Mat img_gray;
         cvtColor(img_result, img_gray, COLOR_RGBA2GRAY);
 
-        std::vector<Rect> faces;
+        vector<Rect> faces;
 
         int minWidth = img_result.cols/3;
 
@@ -220,12 +219,12 @@ extern "C"{
             double face_y = faces[i].y;
 
             Point center(face_x+face_width/2, face_y+face_height/2);
-//            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
+            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
 
             // Detect eyes
             Rect face_area(face_x, face_y, face_width, face_height);
             Mat faceROI = img_gray(face_area);
-            std::vector<Rect> eyes;
+            vector<Rect> eyes;
 
             Point face_center(face_x+((face_width - face_x)/2), face_y+((face_height - face_y)/2));
 
@@ -233,20 +232,34 @@ extern "C"{
             __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "============================");
 
             // get valid eyes
-            std::vector<Point> valid_eyes;
-            getValidEyes(eyes, valid_eyes, 20, face_x, face_y);
-
+            vector<Rect> valid_eyes;
+            getValidEyes_rect(eyes, valid_eyes, 20, face_x, face_y);
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib ::: ", "valid_eyes size: %d", valid_eyes.size());
             for(int j=0; j<valid_eyes.size(); j++){
-                __android_log_print(ANDROID_LOG_DEBUG, "native-lib ::: ", "eye point: %d %d", valid_eyes[j].x, valid_eyes[j].y);
+                Point eye_center(face_x+valid_eyes[j].x+valid_eyes[j].width/2, face_y+valid_eyes[j].y+valid_eyes[j].height/2);
+                __android_log_print(ANDROID_LOG_DEBUG, "native-lib ::: ", "eye point: %d %d", eye_center.x, eye_center.y);
 //                Point eye_center(face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
 //                __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "eye point: %lf %lf", face_x+eyes[j].x+eyes[j].width/2, face_y+eyes[j].y+eyes[j].height/2);
-                if(valid_eyes[j].y < face_center.y) {
-                    int radius = cvRound((eyes[j].width + eyes[j].height) * 0.25);
-                    circle(img_result, valid_eyes[j], radius, Scalar(255, 0, 255), 20, 8, 0);
+                if(eye_center.y < face_center.y) {
+//                    int radius = cvRound((valid_eyes[j].width + valid_eyes[j].height) * 0.25);
+//                    circle(img_result, eye_center, radius, Scalar(255, 0, 255), 20, 8, 0);
+                    Rect valid_eyes_corrected(face_x+valid_eyes[j].x, face_y+valid_eyes[j].y, valid_eyes[j].width, valid_eyes[j].height);
+//                    rectangle(img_result, valid_eyes_corrected, Scalar(0, 255, 0), 10, 8, 0);
 //                    circle(img_result, Point(0, 0), radius, Scalar(255, 0, 255), 20, 8, 0);
 
-                    // detect pupil
-//                    cv::minMaxLoc
+                    // get minMaxLoc
+                    Rect valid_eyes_without_eyebrows(valid_eyes_corrected.x, valid_eyes_corrected.y+valid_eyes_corrected.height/3, valid_eyes_corrected.width, valid_eyes_corrected.height/3*2);
+                    rectangle(img_result, valid_eyes_without_eyebrows, Scalar(0, 255, 0), 10, 8, 0);
+
+                    Mat eyeMat = img_gray(valid_eyes_without_eyebrows);
+                    double maxVal, minVal;
+                    Point minLoc, maxLoc;
+                    minMaxLoc(eyeMat, &minVal, &maxVal, &minLoc, &maxLoc);
+
+                    Point pupil(minLoc.x+valid_eyes_corrected.x, minLoc.y+valid_eyes_without_eyebrows.y);
+                    circle(img_result, pupil, 10, Scalar(255, 0, 0), 4, 8, 0);
+
+                    // add into Point[] and return
                 }
             }
         }

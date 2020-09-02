@@ -119,6 +119,18 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         startActivityForResult(settingsIntent, SETTINGS_ACTIVITY_REQUEST_CODE);
     }
 
+    /**
+     *
+     * @param status
+     * -1 : not detected
+     * n : # of eyes detected
+     * @param message
+     */
+    @Override
+    public void updateCurrentStatus(int status, String message) {
+        // update current status text field
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

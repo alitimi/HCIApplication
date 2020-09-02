@@ -28,16 +28,16 @@ JNIEXPORT jlong JNICALL Java_com_noweaj_android_pupildetection_core_opencv_Openc
  * Method:    DetectFrontalFace
  * Signature: (JJJ)V
  */
-JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectFrontalFace
-  (JNIEnv *, jobject, jlong, jlong, jlong);
+JNIEXPORT jobjectArray JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectFrontalFace
+  (JNIEnv *, jobject, jlong, jlong);
 
 /*
  * Class:     com_noweaj_android_pupildetection_core_opencv_OpencvNative
  * Method:    DetectEyes
  * Signature: (JJJ)V
  */
-JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
-  (JNIEnv *, jobject, jlong, jlong, jlong, jlong);
+JNIEXPORT jobjectArray JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
+  (JNIEnv *, jobject, jlong, jlong, jobjectArray);
 
 /*
  * Class:     com_noweaj_android_pupildetection_core_opencv_OpencvNative

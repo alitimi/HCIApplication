@@ -12,6 +12,8 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.Arrays;
@@ -96,14 +98,23 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
         if(detectedFace.length < 1) {
             // detected no face
             mView.updateCurrentStatus(-1, "Face not detected");
+            Imgproc.ellipse(matInput, new Point(matInput.cols()/2, matInput.rows()/2), new Size(matInput.cols()/3, matInput.rows()/1.5), 0, 0, 360, new Scalar(255, 0, 0), 10, 8, 0);
             return matInput;
+        }
+        Log.d(TAG, "face detected!: "+detectedFace.length);
+        for(int i=0; i<detectedFace.length; i++){
+            Log.d(TAG, "face"+i+":"+detectedFace[i][0]+"/"+detectedFace[i][1]+"/"+detectedFace[i][2]+"/"+detectedFace[i][3]);
         }
 
         int[][] detectedEyes = OpencvApi.detectEyes(matInput, detectedFace);
+        if(detectedEyes != null){
+            for(int i=0; i<detectedEyes.length; i++){
+                Log.d(TAG, "pupil loc: "+detectedEyes[i][0]+" "+detectedEyes[i][1]);
+            }
+        }
 
-
-
-
+        mView.updateCurrentStatus(1, "Face detected");
+        Imgproc.ellipse(matInput, new Point(matInput.cols()/2, matInput.rows()/2), new Size(matInput.cols()/3, matInput.rows()/1.5), 0, 0, 360, new Scalar(0, 255, 255), 10, 8, 0);
 
 //        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());
 //        Core.flip(matInput, matInput, 1);

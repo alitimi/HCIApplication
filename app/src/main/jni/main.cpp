@@ -105,7 +105,7 @@ extern "C"{
         Mat &img_result = *(Mat *)matAddrInput;
 
         // draw face guide
-        ellipse(img_result, Point(img_result.cols/2, img_result.rows/2), Size(img_result.cols/3, img_result.rows/1.5), 0, 0, 360, Scalar(0, 255, 255), 10, 8, 0);
+//        ellipse(img_result, Point(img_result.cols/2, img_result.rows/2), Size(img_result.cols/3, img_result.rows/1.5), 0, 0, 360, Scalar(0, 255, 255), 10, 8, 0);
 
         // Detect face
         Mat img_gray;
@@ -119,7 +119,6 @@ extern "C"{
 //        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "face %d found", faces.size());
 
         // generate return object
-        jclass facesArrayClass = env->FindClass("[[I");
         jclass faceInfoClass = env->FindClass("[I");
         jobjectArray facesArray = env->NewObjectArray(faces.size(), faceInfoClass, NULL);
 
@@ -131,24 +130,127 @@ extern "C"{
             int face_y = faces[i].y;
 
             Point center(face_x+face_width/2, face_y+face_height/2);
-            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
+//            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
 
-            jintArray faceInfo = env->NewIntArray(4);
-            jint *buf = new jint[4];
-            buf[0] = face_x;
-            buf[1] = face_y;
-            buf[2] = face_width;
-            buf[3] = face_height;
-            env->SetIntArrayRegion(faceInfo, i*4, 4, buf);
-            env->SetObjectArrayElement(facesArray, i, faceInfo);
-            delete[] buf;
+            jintArray faceInfo = NULL;
+            faceInfo = env->NewIntArray(4);
+
+            if(faceInfo != NULL) {
+                jint *buf = new jint[4];
+                buf[0] = face_x;
+                buf[1] = face_y;
+                buf[2] = face_width;
+                buf[3] = face_height;
+                env->SetIntArrayRegion(faceInfo, 0, 4, buf);
+                env->SetObjectArrayElement(facesArray, i, faceInfo);
+                free(buf);
+            } else {
+                // failed to make new int array 'faceInfo'
+            }
         }
         return facesArray;
     }
 
     JNIEXPORT jobjectArray JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
     (JNIEnv *env, jobject instance, jlong cascade_eye, jlong matAddrInput, jobjectArray detectedFaces){
+        Mat &img_result = *(Mat *)matAddrInput;
+        Mat img_gray;
+        cvtColor(img_result, img_gray, COLOR_RGBA2GRAY);
 
+        // parse detectedFaces 2D array to create vector<Rect> faces
+        vector<Rect> faces;
+        int numOfFaces = env->GetArrayLength(detectedFaces);
+        for(int i=0; i<numOfFaces; i++){
+            // get array of face data
+            jintArray faceData = (jintArray) env->GetObjectArrayElement(detectedFaces, i);
+            int numOfRectData = env->GetArrayLength(faceData);
+            jint* vals = env->GetIntArrayElements(faceData, NULL);
+
+            // create Rect data and push_back to faces vector
+            Rect faceRect(vals[0], vals[1], vals[2], vals[3]);
+            faces.push_back(faceRect);
+
+            // release
+            env->ReleaseIntArrayElements(faceData, vals, 0);
+            env->DeleteLocalRef(faceData);
+        }
+
+        // generate return object
+        jclass pupilsArrayClass = env->FindClass("[I");
+        jobjectArray pupilsArray = env->NewObjectArray(0, pupilsArrayClass, NULL);
+
+        for(int i=0; i<faces.size(); i++){
+            int face_width = faces[i].width;
+            int face_height = faces[i].height;
+
+            int face_x = faces[i].x;
+            int face_y = faces[i].y;
+
+            Point center(face_x+face_width/2, face_y+face_height/2);
+//            ellipse(img_result, center, Size(face_width/2, face_height/2), 0, 0, 360, Scalar(255, 0, 255), 20, 8, 0);
+
+            // Detect eyes
+            Rect face_area(face_x, face_y, face_width, face_height);
+            Mat faceROI = img_gray(face_area);
+            vector<Rect> eyes;
+
+            Point face_center(face_x+((face_width - face_x)/2), face_y+((face_height - face_y)/2));
+            ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+
+            // get valid eyes
+            vector<Rect> valid_eyes;
+            getValidEyes_rect(eyes, valid_eyes, 20, face_x, face_y);
+
+            for(int j=0; j<valid_eyes.size(); j++){
+                Point eye_center(face_x+valid_eyes[j].x+valid_eyes[j].width/2, face_y+valid_eyes[j].y+valid_eyes[j].height/2);
+
+                if(eye_center.y < face_center.y){ // eyes cannot position at the below of face center
+                    Rect valid_eyes_corrected(face_x+valid_eyes[j].x, face_y+valid_eyes[j].y, valid_eyes[j].width, valid_eyes[j].height);
+
+                    // remove eyebrow area
+                    Rect valid_eyes_without_eyebrows(valid_eyes_corrected.x, valid_eyes_corrected.y+valid_eyes_corrected.height/3, valid_eyes_corrected.width, valid_eyes_corrected.height/3*2);
+                    rectangle(img_result, valid_eyes_without_eyebrows, Scalar(0, 255, 0), 10, 8, 0);
+
+                    // get minMaxLoc
+                    Mat eyeMat = img_gray(valid_eyes_without_eyebrows);
+                    double maxVal, minVal;
+                    Point minLoc, maxLoc;
+                    minMaxLoc(eyeMat, &minVal, &maxVal, &minLoc, &maxLoc);
+
+                    Point pupil(minLoc.x+valid_eyes_corrected.x, minLoc.y+valid_eyes_without_eyebrows.y);
+
+                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "============================");
+
+                    // put pupil info into return object
+                    jintArray pupilInfo = NULL;
+                    pupilInfo = env->NewIntArray(2);
+
+                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "+++++++++++++++++++++++++++++++");
+
+                    if(pupilInfo != NULL){
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 1");
+                        jint *buf = new jint[2];
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 2");
+                        buf[0] = pupil.x;
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 3");
+                        buf[1] = pupil.y;
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 4");
+                        env->SetIntArrayRegion(pupilInfo, 0, 2, buf);
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 5");
+                        env->SetObjectArrayElement(pupilsArray, i, pupilInfo);
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 6");
+                        free(buf);
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 7");
+
+                        circle(img_result, pupil, 10, Scalar(255, 0, 0), 4, 8, 0);
+                    } else {
+                        // failed to make new int array 'pupilInfo'
+                    }
+                }
+            }
+        }
+
+        return pupilsArray;
     }
 
     JNIEXPORT void JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectPupil

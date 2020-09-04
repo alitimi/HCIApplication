@@ -10,7 +10,7 @@ import org.opencv.android.CameraBridgeViewBase;
 public interface MainContract {
     interface View extends BaseView<Presenter> {
         void startSettingsActivity();
-        void updateCurrentStatus(int status, String message);
+        void updateCurrentStatus(int status, int messageResId);
     }
     interface Presenter extends BasePresenter {
         void observeButton(Button button, int flag);

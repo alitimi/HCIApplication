@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">PupilDetection</string>
 
+    <string name="msg_face_not_detected">얼굴이 감지되지 않습니다.\n화면 안의 영역에 얼굴을 맞춰 주세요.</string>
+    <string name="msg_eyes_detected">눈이 감지되었습니다.</string>
+    <string name="msg_eyes_not_detected">눈이 감지되지 않습니다.\n얼굴을 좀 더 가까이 하거나\n좀 더 밝은 환경에서 다시 시도해 주세요.</string>
+
     <string name="b_register">REGISTER</string>
     <string name="b_verify">VERIFY</string>
     <string name="b_delete">DELETE</string>

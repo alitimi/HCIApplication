@@ -201,7 +201,13 @@ extern "C"{
 
             Point face_center(face_x+((face_width - face_x)/2), face_y+((face_height - face_y)/2));
             ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
-            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "%d eyes detected. Filtering valid eyes.", eyes.size());
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "%d eyes detected.", eyes.size());
+
+            if(eyes.size() < 1){
+                __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "exiting.");
+                return NULL;
+            }
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "Filtering valid eyes.");
 
             // get valid eyes
             vector<Rect> valid_eyes;

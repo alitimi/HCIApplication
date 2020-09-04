@@ -51,7 +51,7 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         camera = findViewById(R.id.jcv_camera);
         camera.setVisibility(SurfaceView.VISIBLE);
         camera.setCvCameraViewListener(mPresenter.getCvCameraViewListener());
-        camera.setCameraIndex(1); //front 1, back 0
+        camera.setCameraIndex(1); // front 1, back 0
         camera.enableFpsMeter();
 
         tv_instruction = findViewById(R.id.tv_instruction);
@@ -124,11 +124,13 @@ public class MainActivity extends BaseActivity implements MainContract.View {
      * @param status
      * -1 : not detected
      * n : # of eyes detected
-     * @param message
+     * @param messageResId
      */
     @Override
-    public void updateCurrentStatus(int status, String message) {
+    public void updateCurrentStatus(int status, int messageResId) {
         // update current status text field
+        String message = this.getString(messageResId);
+        runOnUiThread(() -> tv_instruction.setText(message));
     }
 
     @Override

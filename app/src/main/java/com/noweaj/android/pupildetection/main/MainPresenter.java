@@ -4,6 +4,7 @@ import android.util.Log;
 import android.widget.Button;
 
 import com.jakewharton.rxbinding3.view.RxView;
+import com.noweaj.android.pupildetection.R;
 import com.noweaj.android.pupildetection.core.opencv.OpencvApi;
 import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
 import com.noweaj.android.pupildetection.data.CascadeData;
@@ -97,7 +98,7 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
         int[][] detectedFace = OpencvApi.detectFrontalFace(matInput);
         if(detectedFace == null || detectedFace.length < 1) {
             // detected no face
-            mView.updateCurrentStatus(-1, "Face not detected");
+            mView.updateCurrentStatus(-1, R.string.msg_face_not_detected);
             Imgproc.ellipse(matInput, new Point(matInput.cols()/2, matInput.rows()/2), new Size(matInput.cols()/3, matInput.rows()/1.5), 0, 0, 360, new Scalar(255, 0, 0), 10, 8, 0);
             return matInput;
         }
@@ -106,16 +107,26 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
             Log.d(TAG, "face"+i+":"+detectedFace[i][0]+"/"+detectedFace[i][1]+"/"+detectedFace[i][2]+"/"+detectedFace[i][3]);
         }
 
+        boolean isEyesDetected = false;
+        int eyesCnt = 0;
         int[][] detectedEyes = OpencvApi.detectEyes(matInput, detectedFace);
         if(detectedEyes != null){
             for(int i=0; i<detectedEyes.length; i++){
                 if(detectedEyes[i] != null) {
                     Log.d(TAG, "pupil loc: " + detectedEyes[i][0] + " " + detectedEyes[i][1]);
+                    isEyesDetected = true;
+                    eyesCnt++;
                 }
             }
         }
 
-        mView.updateCurrentStatus(1, "Face detected");
+        if(isEyesDetected){
+            mView.updateCurrentStatus(eyesCnt, R.string.msg_eyes_detected);
+        } else {
+            mView.updateCurrentStatus(0, R.string.msg_eyes_not_detected);
+        }
+
+
         Imgproc.ellipse(matInput, new Point(matInput.cols()/2, matInput.rows()/2), new Size(matInput.cols()/3, matInput.rows()/1.5), 0, 0, 360, new Scalar(0, 255, 255), 10, 8, 0);
 
 //        nativeMethod.ConvertRGBtoGray(matInput.getNativeObjAddr(), matInput.getNativeObjAddr());

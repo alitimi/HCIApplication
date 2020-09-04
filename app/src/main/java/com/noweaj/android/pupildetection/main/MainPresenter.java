@@ -95,7 +95,7 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
         Imgproc.warpAffine(matInput, matInput, matModified, matInput.size());
 
         int[][] detectedFace = OpencvApi.detectFrontalFace(matInput);
-        if(detectedFace.length < 1) {
+        if(detectedFace == null || detectedFace.length < 1) {
             // detected no face
             mView.updateCurrentStatus(-1, "Face not detected");
             Imgproc.ellipse(matInput, new Point(matInput.cols()/2, matInput.rows()/2), new Size(matInput.cols()/3, matInput.rows()/1.5), 0, 0, 360, new Scalar(255, 0, 0), 10, 8, 0);
@@ -109,7 +109,9 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
         int[][] detectedEyes = OpencvApi.detectEyes(matInput, detectedFace);
         if(detectedEyes != null){
             for(int i=0; i<detectedEyes.length; i++){
-                Log.d(TAG, "pupil loc: "+detectedEyes[i][0]+" "+detectedEyes[i][1]);
+                if(detectedEyes[i] != null) {
+                    Log.d(TAG, "pupil loc: " + detectedEyes[i][0] + " " + detectedEyes[i][1]);
+                }
             }
         }
 

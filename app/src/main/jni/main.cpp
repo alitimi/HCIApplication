@@ -101,6 +101,7 @@ extern "C"{
 
     JNIEXPORT jobjectArray JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectFrontalFace
     (JNIEnv *env, jobject instance, jlong cascade_face, jlong matAddrInput){
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "===== DetectFrontalFace Starts");
 
         Mat &img_result = *(Mat *)matAddrInput;
 
@@ -148,16 +149,20 @@ extern "C"{
                 // failed to make new int array 'faceInfo'
             }
         }
+
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "===== DetectFrontalFace Ends");
         return facesArray;
     }
 
     JNIEXPORT jobjectArray JNICALL Java_com_noweaj_android_pupildetection_core_opencv_OpencvNative_DetectEyes
     (JNIEnv *env, jobject instance, jlong cascade_eye, jlong matAddrInput, jobjectArray detectedFaces){
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "===== DetectEyes Starts");
         Mat &img_result = *(Mat *)matAddrInput;
         Mat img_gray;
         cvtColor(img_result, img_gray, COLOR_RGBA2GRAY);
 
         // parse detectedFaces 2D array to create vector<Rect> faces
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "transform jobjectArray to vector<Rect> object");
         vector<Rect> faces;
         int numOfFaces = env->GetArrayLength(detectedFaces);
         for(int i=0; i<numOfFaces; i++){
@@ -177,8 +182,8 @@ extern "C"{
 
         // generate return object
         jclass pupilsArrayClass = env->FindClass("[I");
-        jobjectArray pupilsArray = env->NewObjectArray(0, pupilsArrayClass, NULL);
-
+        jobjectArray pupilsArray = NULL; // temporarily create pupilsArray object to return
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "%d faces detected. Searching for eyes.", faces.size());
         for(int i=0; i<faces.size(); i++){
             int face_width = faces[i].width;
             int face_height = faces[i].height;
@@ -196,15 +201,21 @@ extern "C"{
 
             Point face_center(face_x+((face_width - face_x)/2), face_y+((face_height - face_y)/2));
             ((CascadeClassifier *) cascade_eye)->detectMultiScale(faceROI, eyes, 1.1, 2, 0|CASCADE_SCALE_IMAGE, Size(30, 30));
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "%d eyes detected. Filtering valid eyes.", eyes.size());
 
             // get valid eyes
             vector<Rect> valid_eyes;
             getValidEyes_rect(eyes, valid_eyes, 20, face_x, face_y);
+            __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "%d valid eyes detected. Locate pupils.", valid_eyes.size());
+
+            // resize pupilsArray object with the size of valid_eyes
+            pupilsArray = env->NewObjectArray(valid_eyes.size(), pupilsArrayClass, NULL);
 
             for(int j=0; j<valid_eyes.size(); j++){
                 Point eye_center(face_x+valid_eyes[j].x+valid_eyes[j].width/2, face_y+valid_eyes[j].y+valid_eyes[j].height/2);
 
                 if(eye_center.y < face_center.y){ // eyes cannot position at the below of face center
+                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "The valid_eyes[%d] is located above face center.", j);
                     Rect valid_eyes_corrected(face_x+valid_eyes[j].x, face_y+valid_eyes[j].y, valid_eyes[j].width, valid_eyes[j].height);
 
                     // remove eyebrow area
@@ -216,16 +227,19 @@ extern "C"{
                     double maxVal, minVal;
                     Point minLoc, maxLoc;
                     minMaxLoc(eyeMat, &minVal, &maxVal, &minLoc, &maxLoc);
+                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "minMaxLoc processed");
 
                     Point pupil(minLoc.x+valid_eyes_corrected.x, minLoc.y+valid_eyes_without_eyebrows.y);
 
-                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "============================");
-
                     // put pupil info into return object
                     jintArray pupilInfo = NULL;
+                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "env->ExceptionCheck()");
+                    if(env->ExceptionCheck()){ // checks Exception has occured
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "exception");
+                        return NULL; // cannot use the pupilInfo object. skip current detection.
+                    }
                     pupilInfo = env->NewIntArray(2);
-
-                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "+++++++++++++++++++++++++++++++");
+                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "env->NewIntArray(2)");
 
                     if(pupilInfo != NULL){
                         __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 1");
@@ -243,6 +257,7 @@ extern "C"{
                         __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 7");
 
                         circle(img_result, pupil, 10, Scalar(255, 0, 0), 4, 8, 0);
+                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 8");
                     } else {
                         // failed to make new int array 'pupilInfo'
                     }
@@ -250,6 +265,7 @@ extern "C"{
             }
         }
 
+        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "===== DetectEyes Ends");
         return pupilsArray;
     }
 

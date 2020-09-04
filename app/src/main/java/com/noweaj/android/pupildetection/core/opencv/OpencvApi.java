@@ -1,10 +1,14 @@
 package com.noweaj.android.pupildetection.core.opencv;
 
+import android.util.Log;
+
 import com.noweaj.android.pupildetection.data.CascadeData;
 
 import org.opencv.core.Mat;
 
 public class OpencvApi {
+
+    private static final String TAG = OpencvApi.class.getSimpleName();
 
     /**
      *
@@ -16,7 +20,13 @@ public class OpencvApi {
      * int[3] -> face height
      */
     public static int[][] detectFrontalFace(Mat input){
-        return OpencvNative.DetectFrontalFace(CascadeData.cascade_frontalface, input.getNativeObjAddr());
+        int[][] result = null;
+        try{
+            result = OpencvNative.DetectFrontalFace(CascadeData.cascade_frontalface, input.getNativeObjAddr());
+        } catch (Exception e){
+            Log.d(TAG, "Exception: "+e.getLocalizedMessage());
+        }
+        return result;
     }
 
     public static int[][] detectEyes(Mat input, int[][] detectedFaces){

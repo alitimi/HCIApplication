@@ -245,25 +245,16 @@ extern "C"{
                         return NULL; // cannot use the pupilInfo object. skip current detection.
                     }
                     pupilInfo = env->NewIntArray(2);
-                    __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "env->NewIntArray(2)");
 
                     if(pupilInfo != NULL){
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 1");
                         jint *buf = new jint[2];
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 2");
                         buf[0] = pupil.x;
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 3");
                         buf[1] = pupil.y;
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 4");
                         env->SetIntArrayRegion(pupilInfo, 0, 2, buf);
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 5");
                         env->SetObjectArrayElement(pupilsArray, i, pupilInfo);
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 6");
                         free(buf);
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 7");
 
                         circle(img_result, pupil, 10, Scalar(255, 0, 0), 4, 8, 0);
-                        __android_log_print(ANDROID_LOG_DEBUG, "native-lib :: ", "--- 8");
                     } else {
                         // failed to make new int array 'pupilInfo'
                     }

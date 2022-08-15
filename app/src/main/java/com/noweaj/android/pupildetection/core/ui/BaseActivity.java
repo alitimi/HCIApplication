@@ -270,4 +270,6 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         }
     }
+
+    public abstract void updateCurrentStatus2(int status, int messageResId, boolean maxLeft, boolean maxRight, boolean maxCenter, int left, int right, int center);
 }

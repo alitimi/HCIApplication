@@ -97,6 +97,11 @@ public class SettingsActivity extends BaseActivity implements SettingsContract.V
     }
 
     @Override
+    public void updateCurrentStatus2(int status, int messageResId, boolean maxLeft, boolean maxRight, boolean maxCenter, int left, int right, int center) {
+
+    }
+
+    @Override
     protected void enableView() {
         jcv_settings_camera.enableView();
     }

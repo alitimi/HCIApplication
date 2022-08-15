@@ -48,6 +48,8 @@ dependencies {
 
     implementation 'com.jakewharton.rxbinding3:rxbinding:3.1.0'
     implementation 'com.jakewharton.rxbinding3:rxbinding-appcompat:3.1.0'
+    implementation 'nl.bravobit:android-ffmpeg:1.1.7'
+
 
     implementation project(path: ':opencv420')
     testImplementation 'junit:junit:4.12'

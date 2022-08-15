@@ -2,24 +2,16 @@ package com.noweaj.android.pupildetection.main;
 
 import android.util.Log;
 import android.widget.Button;
-
 import com.jakewharton.rxbinding3.view.RxView;
 import com.noweaj.android.pupildetection.R;
 import com.noweaj.android.pupildetection.core.opencv.OpencvApi;
-import com.noweaj.android.pupildetection.core.opencv.OpencvNative;
-import com.noweaj.android.pupildetection.data.CascadeData;
-
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -29,11 +21,17 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
 
     private MainContract.View mView;
 
+    int left = 0;
+    int right = 0;
+    int center = 0;
+
     public MainPresenter(MainContract.View mView){
         this.mView = mView;
     }
 
     private CompositeDisposable mCompositeDisposable;
+
+    private int horizontalRatio;
 
     @Override
     public void subscribe() {
@@ -91,6 +89,7 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+
         Mat matInput = inputFrame.rgba();
         Mat matModified = Imgproc.getRotationMatrix2D(new Point(matInput.cols()/2, matInput.rows()/2), 90, 1);
         Imgproc.warpAffine(matInput, matInput, matModified, matInput.size());
@@ -98,7 +97,7 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
         int[][] detectedFace = OpencvApi.detectFrontalFace(matInput);
         if(detectedFace == null || detectedFace.length < 1) {
             // detected no face
-            mView.updateCurrentStatus(-1, R.string.msg_face_not_detected);
+            mView.updateCurrentStatus(-1,R.string.msg_face_not_detected);
             Imgproc.ellipse(matInput, new Point(matInput.cols()/2, matInput.rows()/2), new Size(matInput.cols()/3, matInput.rows()/1.5), 0, 0, 360, new Scalar(255, 0, 0), 10, 8, 0);
             return matInput;
         }
@@ -108,20 +107,53 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
         }
 
         boolean isEyesDetected = false;
+        boolean maxLeft = false;
+        boolean maxCenter = false;
+        boolean maxRight = false;
         int eyesCnt = 0;
         int[][] detectedEyes = OpencvApi.detectEyes(matInput, detectedFace);
         if(detectedEyes != null){
             for(int i=0; i<detectedEyes.length; i++){
                 if(detectedEyes[i] != null) {
                     Log.d(TAG, "pupil loc: " + detectedEyes[i][0] + " " + detectedEyes[i][1]);
+                    horizontalRatio = (detectedEyes[i][0] + detectedEyes[i][1]) / 2;
+                    Log.d(TAG, "H " + horizontalRatio + " ");
+                    if (horizontalRatio >= 460) {
+                        Log.d(TAG, "Left");
+                        left += 1;
+
+                    }
+                    if (horizontalRatio <= 370) {
+                        Log.d(TAG, "Right");
+                        right += 1;
+                    }
+                    if (horizontalRatio > 370 && horizontalRatio < 460) {
+                        Log.d(TAG, "Center");
+                        center += 1;
+                    }
                     isEyesDetected = true;
                     eyesCnt++;
                 }
             }
         }
 
-        if(isEyesDetected){
-            mView.updateCurrentStatus(eyesCnt, R.string.msg_eyes_detected);
+        if(isEyesDetected && left > 20 || center > 20 || right > 20){
+            if (Math.max(Math.max(left, right), center) == left) {
+                maxLeft = true;
+                mView.updateCurrentStatus2(eyesCnt ,R.string.msg_look_left, maxLeft, maxRight, maxCenter, left, right, center);
+            } else if (Math.max(Math.max(left, right), center) == right){
+                maxRight = true;
+                mView.updateCurrentStatus2(eyesCnt , R.string.msg_look_right, maxLeft, maxRight, maxCenter, left, right, center);
+            }
+            else if(Math.max(Math.max(left, right), center) == center) {
+                maxCenter = true;
+                mView.updateCurrentStatus2(eyesCnt, R.string.msg_look_center, maxLeft, maxRight, maxCenter, left, right, center);
+            } else {
+                mView.updateCurrentStatus2(eyesCnt, R.string.msg_eyes_not_trackable, maxLeft, maxRight, maxCenter, left, right, center);
+            }
+            left = 0;
+            right = 0;
+            center = 0;
         } else {
             mView.updateCurrentStatus(0, R.string.msg_eyes_not_detected);
         }

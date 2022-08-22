@@ -81,6 +81,15 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         //Starting VideView By Setting MediaController and URI
         videoView.setMediaController(mediaController);
         videoView.setVideoURI(uri1);
+
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                Intent intent = new Intent(MainActivity.this, ExaminationActivity.class);
+                startActivity(intent);
+            }
+        });
+
         videoViewLeft.setVideoURI(uri2);
         videoViewLeft.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 

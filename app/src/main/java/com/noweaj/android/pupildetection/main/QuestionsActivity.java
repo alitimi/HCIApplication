@@ -153,7 +153,7 @@ public class QuestionsActivity extends AppCompatActivity {
         linearLayout.addView(rg4);
 
         next.setOnClickListener(view -> {
-            Intent intent = new Intent(QuestionsActivity.this, MainActivity.class);
+            Intent intent = new Intent(QuestionsActivity.this, ExaminationActivity.class);
             startActivity(intent);
         });
     }

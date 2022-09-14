@@ -1,7 +1,9 @@
 package com.noweaj.android.pupildetection.main;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.Button;
@@ -13,6 +15,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.noweaj.android.pupildetection.R;
 
+import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
 public class QuestionsActivity extends AppCompatActivity {
 
     Integer size;
@@ -23,6 +29,9 @@ public class QuestionsActivity extends AppCompatActivity {
     RadioGroup rg5;
     Button next;
     Button back;
+    private Dialog dialog;
+    private static AtomicLong idCounter;
+    private static final String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,6 +40,23 @@ public class QuestionsActivity extends AppCompatActivity {
 
         next = findViewById(R.id.okbutton);
         back = findViewById(R.id.cancelbutton);
+        idCounter = new AtomicLong();
+
+        dialog = new Dialog(QuestionsActivity.this);
+        dialog.setContentView(R.layout.filter_info);
+        dialog.show();
+
+
+
+        final Button accept = dialog.findViewById(R.id.button_ok);
+        final Button cancel = dialog.findViewById(R.id.button_cancel);
+        final TextView info = dialog.findViewById(R.id.info);
+        info.setText( "کابر گرامی " + getRandomString(4) + " ، از اینکه وقت خود را برای شرکت در این پژوهش در اختیار ما قرار داده اید صمیمانه سپازگزاریم.");
+        accept.setOnClickListener(view -> dialog.dismiss());
+        cancel.setOnClickListener(view -> {
+            finish();
+            System.exit(0);
+        });
 
         LinearLayout linearLayout = findViewById(R.id.container1);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -41,7 +67,7 @@ public class QuestionsActivity extends AppCompatActivity {
         textView.setGravity(Gravity.TOP);
         textView.setBackgroundColor(Color.WHITE);
         textView.setPadding(10,0,10,0);
-        textView.setTextSize(20);
+        textView.setTextSize(15);
         linearLayout.addView(textView);
 
         rg = new RadioGroup(getApplicationContext());
@@ -61,7 +87,7 @@ public class QuestionsActivity extends AppCompatActivity {
         textView2.setGravity(Gravity.TOP);
         textView2.setBackgroundColor(Color.WHITE);
         textView2.setPadding(10,10,10,0);
-        textView2.setTextSize(20);
+        textView2.setTextSize(15);
         linearLayout.addView(textView2);
 
         rg2 = new RadioGroup(getApplicationContext());
@@ -90,7 +116,7 @@ public class QuestionsActivity extends AppCompatActivity {
         textView3.setGravity(Gravity.TOP);
         textView3.setBackgroundColor(Color.WHITE);
         textView3.setPadding(10,10,10,0);
-        textView3.setTextSize(20);
+        textView3.setTextSize(15);
         linearLayout.addView(textView3);
 
         rg3 = new RadioGroup(getApplicationContext());
@@ -111,7 +137,7 @@ public class QuestionsActivity extends AppCompatActivity {
         textView4.setGravity(Gravity.TOP);
         textView4.setBackgroundColor(Color.WHITE);
         textView4.setPadding(10,10,10,0);
-        textView4.setTextSize(20);
+        textView4.setTextSize(15);
         linearLayout.addView(textView4);
 
         rg5 = new RadioGroup(getApplicationContext());
@@ -130,31 +156,46 @@ public class QuestionsActivity extends AppCompatActivity {
         linearLayout.addView(rg5);
 
         TextView textView5 = new TextView(this);
-        textView5.setText("روزانه چند ساعت از برنامه هایی نظیر اسکایپ استفاده می کنید؟");
+        textView5.setText("در طول هفته چند روز از برنامه هایی نظیر اسکایپ استفاده می کنید؟");
         textView5.setGravity(Gravity.TOP);
         textView5.setBackgroundColor(Color.WHITE);
         textView5.setPadding(10,10,10,0);
-        textView5.setTextSize(20);
+        textView5.setTextSize(15);
         linearLayout.addView(textView5);
 
         rg4 = new RadioGroup(getApplicationContext());
         rg4.setOrientation(RadioGroup.VERTICAL);
+        RadioButton rb15 = new RadioButton(this);
+        rb15.setText("اصلا استفاده نمی کنم");
+        rg4.addView(rb15);
         RadioButton rb12 = new RadioButton(this);
-        rb12.setText("زیر 1 ساعت");
+        rb12.setText("یک الی دو روز");
         rg4.addView(rb12);
         RadioButton rb13 = new RadioButton(this);
-        rb13.setText("بین 1 و 2 ساعت");
+        rb13.setText("سه الی پنج روز");
         rg4.addView(rb13);
         RadioButton rb14 = new RadioButton(this);
-        rb14.setText("بالای 2 ساعت");
+        rb14.setText("تقریبا هر روز هفته استفاده می کنم");
         rg4.addView(rb14);
         rg4.setGravity(Gravity.END);
         rg4.setPadding(10,0,10,0);
         linearLayout.addView(rg4);
 
         next.setOnClickListener(view -> {
-            Intent intent = new Intent(QuestionsActivity.this, ExaminationActivity.class);
+            Random rn = new Random();
+            int answer = rn.nextInt(5) + 1;
+            Intent intent = new Intent(QuestionsActivity.this, MainActivity.class);
+            intent.putExtra("num", answer);
             startActivity(intent);
         });
+    }
+
+    private static String getRandomString(final int sizeOfRandomString)
+    {
+        final Random random=new Random();
+        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
+        for(int i=0;i<sizeOfRandomString;++i)
+            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
+        return sb.toString();
     }
 }

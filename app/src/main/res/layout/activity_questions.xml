@@ -108,6 +108,7 @@
                     android:background="@drawable/button_background"
                     app:backgroundTint="@color/colorPrimary"
                     android:elevation="0dp"
+                    android:visibility="gone"
                     android:layout_gravity="center_horizontal"
                     android:textColor="@android:color/white"
                     android:layout_marginTop="32dp"

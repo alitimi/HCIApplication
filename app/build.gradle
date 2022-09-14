@@ -23,8 +23,8 @@ android {
         }
     }
 
-    externalNativeBuild{
-        ndkBuild{
+    externalNativeBuild {
+        ndkBuild {
             path 'src/main/jni/Android.mk'
         }
     }
@@ -34,7 +34,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
 }
@@ -49,6 +49,8 @@ dependencies {
     implementation 'com.jakewharton.rxbinding3:rxbinding:3.1.0'
     implementation 'com.jakewharton.rxbinding3:rxbinding-appcompat:3.1.0'
     implementation 'nl.bravobit:android-ffmpeg:1.1.7'
+
+    implementation 'com.google.code.gson:gson:2.9.1'
 
 
     implementation project(path: ':opencv420')

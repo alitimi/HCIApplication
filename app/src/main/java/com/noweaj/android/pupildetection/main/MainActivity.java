@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.animation.Animation;
@@ -32,6 +33,7 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         System.loadLibrary("native-lib");
     }
 
+    int number;
     private CameraBridgeViewBase camera;
     private TextView tv_instruction;
     private TextView tv_instruction2;
@@ -53,6 +55,8 @@ public class MainActivity extends BaseActivity implements MainContract.View {
     @Override
     protected void initView() {
         setContentView(R.layout.activity_main);
+        Bundle b = getIntent().getExtras();
+        number = b.getInt("num");
 
         mPresenter = new MainPresenter(this);
 
@@ -74,9 +78,27 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         MediaController mediaController = new MediaController(this);
         mediaController.setAnchorView(videoView);
         //Location of Media File
-        uri1 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.video);
-        uri2 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.left);
-        uri3 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.right);
+        if (number == 1) {
+            uri1 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening1);
+            uri2 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening1left);
+            uri3 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening1right);
+        } else if (number == 2){
+            uri1 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening2);
+            uri2 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening2left);
+            uri3 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening2right);
+        } else if (number == 3){
+            uri1 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening3);
+            uri2 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening3left);
+            uri3 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening3right);
+        } else if (number == 4){
+            uri1 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening4);
+            uri2 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening4left);
+            uri3 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening4right);
+        } else if (number == 5){
+            uri1 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening5);
+            uri2 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening5left);
+            uri3 = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.videolistening5right);
+        }
 
         //Starting VideView By Setting MediaController and URI
         videoView.setMediaController(mediaController);
@@ -86,6 +108,7 @@ public class MainActivity extends BaseActivity implements MainContract.View {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 Intent intent = new Intent(MainActivity.this, ExaminationActivity.class);
+                intent.putExtra("num", number);
                 startActivity(intent);
             }
         });

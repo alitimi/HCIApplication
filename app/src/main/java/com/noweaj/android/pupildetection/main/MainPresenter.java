@@ -118,16 +118,16 @@ public class MainPresenter implements MainContract.Presenter, CameraBridgeViewBa
                     Log.d(TAG, "pupil loc: " + detectedEyes[i][0] + " " + detectedEyes[i][1]);
                     horizontalRatio = (detectedEyes[i][0] + detectedEyes[i][1]) / 2;
                     Log.d(TAG, "H " + horizontalRatio + " ");
-                    if (horizontalRatio >= 460) {
+                    if (horizontalRatio >= 440) {
                         Log.d(TAG, "Left");
                         left += 1;
 
                     }
-                    if (horizontalRatio <= 370) {
+                    if (horizontalRatio <= 380) {
                         Log.d(TAG, "Right");
                         right += 1;
                     }
-                    if (horizontalRatio > 370 && horizontalRatio < 460) {
+                    if (horizontalRatio > 380 && horizontalRatio < 440) {
                         Log.d(TAG, "Center");
                         center += 1;
                     }

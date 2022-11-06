@@ -51,7 +51,7 @@ public class QuestionsActivity extends AppCompatActivity {
         final Button accept = dialog.findViewById(R.id.button_ok);
         final Button cancel = dialog.findViewById(R.id.button_cancel);
         final TextView info = dialog.findViewById(R.id.info);
-        info.setText( "کابر گرامی " + getRandomString(4) + " ، از اینکه وقت خود را برای شرکت در این پژوهش در اختیار ما قرار داده اید صمیمانه سپازگزاریم.");
+        info.setText( "کابر گرامی " + getRandomString(4) + " ، از اینکه وقت خود را برای شرکت در این پژوهش در اختیار ما قرار داده اید صمیمانه سپاسگزاریم.");
         accept.setOnClickListener(view -> dialog.dismiss());
         cancel.setOnClickListener(view -> {
             finish();
@@ -160,6 +160,7 @@ public class QuestionsActivity extends AppCompatActivity {
         textView5.setGravity(Gravity.TOP);
         textView5.setBackgroundColor(Color.WHITE);
         textView5.setPadding(10,10,10,0);
+
         textView5.setTextSize(15);
         linearLayout.addView(textView5);
 
